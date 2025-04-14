@@ -1,3 +1,4 @@
+# Validating workflow syntax
 name: Deploy Prompt Management System
 
 on:
@@ -132,25 +133,11 @@ jobs:
           # Try SSH connection with passphrase
           if [[ -n "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
             echo "Testing SSH connection with passphrase..."
-            # Using expect script to handle passphrase
+            # Using expect script to handle passphrase without heredoc
             sudo apt-get install -y expect
             
-            cat > ssh_test.sh << "EOFMARKER"
-#!/usr/bin/expect -f
-set timeout 30
-set passphrase [lindex $argv 0]
-set host [lindex $argv 1]
-set user [lindex $argv 2]
-
-spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "echo 'SSH test with passphrase'"
-expect {
-  "Enter passphrase" {
-    send "$passphrase\r"
-    exp_continue
-  }
-  eof
-}
-EOFMARKER
+            # Create expect script with printf
+            printf '#!/usr/bin/expect -f\nset timeout 30\nset passphrase [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "echo '"'"'SSH test with passphrase'"'"'"\nexpect {\n  "Enter passphrase" {\n    send "$passphrase\\r"\n    exp_continue\n  }\n  eof\n}\n' > ssh_test.sh
             
             chmod +x ssh_test.sh
             ./ssh_test.sh "${{ secrets.SSH_KEY_PASSPHRASE }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "SSH test with passphrase failed, but continuing workflow"
@@ -223,79 +210,15 @@ EOFMARKER
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           
-          # Create remotely executed script with env variables passed securely
-          cat > deploy.sh << "DEPLOY_EOF"
-#!/bin/bash
-set -e
+          # Create remotely executed script with env variables passed securely using printf
+          printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\nEOL\n\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh
 
-echo "SSH connection successful!"
-
-# Verify deployment directory
-DEPLOY_DIR="/root/projects"
-if [ ! -d "$DEPLOY_DIR" ]; then
-  echo "Creating deployment directory..."
-  mkdir -p "$DEPLOY_DIR"
-fi
-
-cd "$DEPLOY_DIR"
-
-# Create the .env file - values will be sent securely via SSH
-echo "Creating .env file..."
-mkdir -p backend
-cat > backend/.env << EOL
-# Variables will be populated by secure environment transfer
-EOL
-
-echo "Pulling and starting Docker containers..."
-docker-compose pull
-docker-compose up -d
-
-echo "Deployment completed successfully!"
-DEPLOY_EOF
-          
           # Install sshpass for passphrase
           if [[ -n "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
             sudo apt-get update && sudo apt-get install -y sshpass expect
             
-            # Using expect script for SCP with passphrase
-            cat > scp_script.sh << "SCP_EOF"
-#!/usr/bin/expect -f
-set timeout 30
-set passphrase [lindex $argv 0]
-set host [lindex $argv 1]
-set user [lindex $argv 2]
-
-spawn scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh
-expect {
-  "Enter passphrase" {
-    send "$passphrase\r"
-    exp_continue
-  }
-  eof
-}
-
-# Run the script with environment variables
-spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo 'Creating secure env file' && cat > /root/projects/backend/.env << 'EOL'
-SECRET_KEY=\"$env(SECRET_KEY)\"
-DEBUG=\"$env(DEBUG)\"
-POSTGRES_DB=\"$env(POSTGRES_DB)\"
-POSTGRES_USER=\"$env(POSTGRES_USER)\"
-POSTGRES_PASSWORD=\"$env(POSTGRES_PASSWORD)\"
-POSTGRES_HOST=db
-POSTGRES_PORT=5432
-DJANGO_SUPERUSER_USERNAME=\"$env(DJANGO_SUPERUSER_USERNAME)\"
-DJANGO_SUPERUSER_EMAIL=\"$env(DJANGO_SUPERUSER_EMAIL)\"
-DJANGO_SUPERUSER_PASSWORD=\"$env(DJANGO_SUPERUSER_PASSWORD)\"
-EOL"
-
-expect {
-  "Enter passphrase" {
-    send "$passphrase\r"
-    exp_continue
-  }
-  eof
-}
-SCP_EOF
+            # Using expect script for SCP with passphrase without heredoc
+            printf '#!/usr/bin/expect -f\nset timeout 30\nset passphrase [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh\nexpect {\n  "Enter passphrase" {\n    send "$passphrase\\r"\n    exp_continue\n  }\n  eof\n}\n\n# Run the script with environment variables\nspawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo '"'"'Creating secure env file'"'"' && cat > /root/projects/backend/.env << '"'"'EOL'"'"'\nSECRET_KEY=\\"$env(SECRET_KEY)\\"\nDEBUG=\\"$env(DEBUG)\\"\nPOSTGRES_DB=\\"$env(POSTGRES_DB)\\"\nPOSTGRES_USER=\\"$env(POSTGRES_USER)\\"\nPOSTGRES_PASSWORD=\\"$env(POSTGRES_PASSWORD)\\"\nPOSTGRES_HOST=db\nPOSTGRES_PORT=5432\nDJANGO_SUPERUSER_USERNAME=\\"$env(DJANGO_SUPERUSER_USERNAME)\\"\nDJANGO_SUPERUSER_EMAIL=\\"$env(DJANGO_SUPERUSER_EMAIL)\\"\nDJANGO_SUPERUSER_PASSWORD=\\"$env(DJANGO_SUPERUSER_PASSWORD)\\"\nEOL"\n\nexpect {\n  "Enter passphrase" {\n    send "$passphrase\\r"\n    exp_continue\n  }\n  eof\n}\n' > scp_script.sh
             
             chmod +x scp_script.sh
             export SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
@@ -311,23 +234,21 @@ SCP_EOF
             # Fallback to regular SCP and SSH with environment variables
             scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:~/deploy.sh || echo "SCP failed but continuing"
             
-            # Create a temporary file with environment variables that will be securely sent via SSH
-            cat > env_vars.txt << EOL
-SECRET_KEY='${{ secrets.DJANGO_SECRET_KEY }}'
-DEBUG='${{ secrets.DEBUG }}'
-POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
-POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
-POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
-POSTGRES_HOST='db'
-POSTGRES_PORT='5432'
-DJANGO_SUPERUSER_USERNAME='${{ secrets.DJANGO_SUPERUSER_USERNAME }}'
-DJANGO_SUPERUSER_EMAIL='${{ secrets.DJANGO_SUPERUSER_EMAIL }}'
-DJANGO_SUPERUSER_PASSWORD='${{ secrets.DJANGO_SUPERUSER_PASSWORD }}'
-EOL
+            # Create a temporary file with environment variables using printf
+            printf "SECRET_KEY='%s'\nDEBUG='%s'\nPOSTGRES_DB='%s'\nPOSTGRES_USER='%s'\nPOSTGRES_PASSWORD='%s'\nPOSTGRES_HOST='db'\nPOSTGRES_PORT='5432'\nDJANGO_SUPERUSER_USERNAME='%s'\nDJANGO_SUPERUSER_EMAIL='%s'\nDJANGO_SUPERUSER_PASSWORD='%s'\n" \
+              "${{ secrets.DJANGO_SECRET_KEY }}" \
+              "${{ secrets.DEBUG }}" \
+              "${{ secrets.POSTGRES_DB }}" \
+              "${{ secrets.POSTGRES_USER }}" \
+              "${{ secrets.POSTGRES_PASSWORD }}" \
+              "${{ secrets.DJANGO_SUPERUSER_USERNAME }}" \
+              "${{ secrets.DJANGO_SUPERUSER_EMAIL }}" \
+              "${{ secrets.DJANGO_SUPERUSER_PASSWORD }}" > env_vars.txt
             
             # Send environment variables and execute deployment
             cat env_vars.txt | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy.sh && ~/deploy.sh && cat > /root/projects/backend/.env" || echo "SSH execution failed but continuing"
             
             # Remove temporary file
             rm env_vars.txt
-          fi 
+          fi
+
