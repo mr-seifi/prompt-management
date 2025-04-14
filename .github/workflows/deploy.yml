@@ -8,6 +8,8 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
     # Allow manual triggering
+  repository_dispatch:
+    types: [frontend-deployed]
 
 jobs:
   test:
@@ -65,7 +67,7 @@ jobs:
     name: Build and Deploy
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch'
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_TOKEN }}
@@ -102,9 +104,9 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # Build and push Docker image
-      - name: Build and push Docker image
-        if: steps.check_deployment.outputs.can_deploy == 'true'
+      # Only build backend if this is not triggered by frontend deployment
+      - name: Build and push Backend Docker image
+        if: steps.check_deployment.outputs.can_deploy == 'true' && github.event_name != 'repository_dispatch'
         uses: docker/build-push-action@v5
         with:
           context: ./backend
@@ -153,9 +155,70 @@ jobs:
             
             cd "$DEPLOY_DIR"
             
-            # Pull the latest docker-compose file from your repository
-            echo "Downloading docker-compose.yml..."
-            wget -q -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+            # Create docker-compose.yml file directly on the server
+            echo "Creating docker-compose.yml file..."
+            cat > docker-compose.yml << 'EOL'
+            version: '3.8'
+
+            services:
+              # Backend service
+              backend:
+                image: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-backend:latest
+                container_name: prompt-manager-backend
+                volumes:
+                  - ./backend/staticfiles:/app/staticfiles
+                  - ./backend/media:/app/media
+                  - ./backend/static:/app/static
+                  - ./backend/templates:/app/templates
+                ports:
+                  - "8000:8000"
+                depends_on:
+                  - db
+                env_file:
+                  - ./backend/.env
+                command: >
+                  sh -c "chmod +x /app/init.sh && 
+                         /app/init.sh"
+                restart: unless-stopped
+                networks:
+                  - prompt-network
+
+              # Database service
+              db:
+                image: postgres:15-alpine
+                container_name: prompt-manager-db
+                volumes:
+                  - postgres_data:/var/lib/postgresql/data/
+                env_file:
+                  - ./backend/.env
+                ports:
+                  - "5432:5432"
+                restart: unless-stopped
+                networks:
+                  - prompt-network
+
+              # Frontend service
+              frontend:
+                image: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-frontend:latest
+                container_name: prompt-manager-frontend
+                ports:
+                  - "8001:80"
+                depends_on:
+                  - backend
+                environment:
+                  - REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL || 'https://prompt-back.aminseifi.com/api' }}
+                  - REACT_APP_ENVIRONMENT=production
+                restart: unless-stopped
+                networks:
+                  - prompt-network
+
+            volumes:
+              postgres_data:
+
+            networks:
+              prompt-network:
+                driver: bridge
+            EOL
             
             # Create the .env file from secrets
             echo "Creating .env file..."
@@ -195,7 +258,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y sshpass expect
           
           # Create remotely executed script with env variables passed securely using printf
-          printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\nEOL\n\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh
+          printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create docker-compose.yml file\necho "Creating docker-compose.yml file..."\ncat > docker-compose.yml << EOL\nversion: '"'"'3.8'"'"'\n\nservices:\n  # Backend service\n  backend:\n    image: %s/prompt-manager-backend:latest\n    container_name: prompt-manager-backend\n    volumes:\n      - ./backend/staticfiles:/app/staticfiles\n      - ./backend/media:/app/media\n      - ./backend/static:/app/static\n      - ./backend/templates:/app/templates\n    ports:\n      - "8000:8000"\n    depends_on:\n      - db\n    env_file:\n      - ./backend/.env\n    command: >\n      sh -c "chmod +x /app/init.sh && \n             /app/init.sh"\n    restart: unless-stopped\n    networks:\n      - prompt-network\n\n  # Database service\n  db:\n    image: postgres:15-alpine\n    container_name: prompt-manager-db\n    volumes:\n      - postgres_data:/var/lib/postgresql/data/\n    env_file:\n      - ./backend/.env\n    ports:\n      - "5432:5432"\n    restart: unless-stopped\n    networks:\n      - prompt-network\n\n  # Frontend service\n  frontend:\n    image: %s/prompt-manager-frontend:latest\n    container_name: prompt-manager-frontend\n    ports:\n      - "8001:80"\n    depends_on:\n      - backend\n    environment:\n      - REACT_APP_API_URL=%s\n      - REACT_APP_ENVIRONMENT=production\n    restart: unless-stopped\n    networks:\n      - prompt-network\n\nvolumes:\n  postgres_data:\n\nnetworks:\n  prompt-network:\n    driver: bridge\nEOL\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\nEOL\n\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh "${{ secrets.DOCKER_HUB_USERNAME }}" "${{ secrets.DOCKER_HUB_USERNAME }}" "${{ secrets.REACT_APP_API_URL || 'https://prompt-back.aminseifi.com/api' }}"
 
           # Using expect script for SCP with password
           printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn scp -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh\nexpect "password:"\nsend "$password\\r"\nexpect eof\n\n# Run the script with environment variables\nspawn ssh -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo '"'"'Creating secure env file'"'"' && cat > /root/projects/backend/.env << '"'"'EOL'"'"'\nSECRET_KEY='"'"'$env(SECRET_KEY)'"'"'\nDEBUG='"'"'$env(DEBUG)'"'"'\nPOSTGRES_DB='"'"'$env(POSTGRES_DB)'"'"'\nPOSTGRES_USER='"'"'$env(POSTGRES_USER)'"'"'\nPOSTGRES_PASSWORD='"'"'$env(POSTGRES_PASSWORD)'"'"'\nPOSTGRES_HOST=db\nPOSTGRES_PORT=5432\nDJANGO_SUPERUSER_USERNAME='"'"'$env(DJANGO_SUPERUSER_USERNAME)'"'"'\nDJANGO_SUPERUSER_EMAIL='"'"'$env(DJANGO_SUPERUSER_EMAIL)'"'"'\nDJANGO_SUPERUSER_PASSWORD='"'"'$env(DJANGO_SUPERUSER_PASSWORD)'"'"'\nEOL"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > scp_script.sh
