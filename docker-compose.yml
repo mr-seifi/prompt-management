@@ -37,23 +37,18 @@ services:
     networks:
       - prompt-network
 
-  # Frontend service with Apache
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: prompt-manager-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-    environment:
-      - REACT_APP_API_URL=https://prompt-back.aminseifi.com/api
-      - REACT_APP_ENVIRONMENT=production
-      - REACT_APP_USE_MOCK_DATA=false
-    restart: unless-stopped
-    networks:
-      - prompt-network
+  # frontend:
+  #   image: aminseifi/prompt-manager-frontend:latest
+  #   container_name: prompt-manager-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend
+  #   environment:
+  #     - REACT_APP_API_URL=http://localhost:8000/api
+  #   restart: unless-stopped
+  #   networks:
+  #     - prompt-network
 
 volumes:
   postgres_data:
