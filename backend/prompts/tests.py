@@ -113,7 +113,7 @@ class PromptSerializerTest(TestCase):
     def test_prompt_create_serializer_contains_expected_fields(self):
         """Test that PromptCreateSerializer includes only the needed fields."""
         serializer = PromptCreateSerializer(instance=self.prompt)
-        expected_fields = ['title', 'description', 'variables_schema', 'detected_variables', 'favorite']
+        expected_fields = ['id', 'title', 'description', 'variables_schema', 'detected_variables', 'favorite']
         self.assertEqual(set(serializer.data.keys()), set(expected_fields))
         
     def test_prompt_render_serializer_validation(self):
