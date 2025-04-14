@@ -13,8 +13,23 @@ RUN npm ci
 # Copy all files
 COPY . .
 
-# Build the app
-RUN npm run build
+# Add build arguments for environment variables
+ARG REACT_APP_API_URL
+ARG REACT_APP_ENVIRONMENT
+ARG REACT_APP_USE_MOCK_DATA
+
+# Set environment variables for build
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+ENV REACT_APP_ENVIRONMENT=${REACT_APP_ENVIRONMENT}
+ENV REACT_APP_USE_MOCK_DATA=${REACT_APP_USE_MOCK_DATA}
+
+# Print environment variables for debugging
+RUN echo "Building with API URL: $REACT_APP_API_URL"
+RUN echo "Building with Environment: $REACT_APP_ENVIRONMENT"
+RUN echo "Building with Mock Data: $REACT_APP_USE_MOCK_DATA"
+
+# Build the app with CI=false to prevent treating warnings as errors
+RUN CI=false npm run build
 
 # Stage 2: Set up Apache
 FROM httpd:2.4-alpine

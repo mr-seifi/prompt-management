@@ -152,8 +152,9 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-frontend:latest
           build-args: |
-            REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL || 'https://prompt-back.aminseifi.com/api' }}
-            REACT_APP_ENVIRONMENT=${{ secrets.REACT_APP_ENVIRONMENT || 'production' }}
+            REACT_APP_API_URL=https://prompt-back.aminseifi.com/api
+            REACT_APP_ENVIRONMENT=production
+            REACT_APP_USE_MOCK_DATA=false
 
       # 2. Build and push Backend Docker image
       - name: Build and push Backend Docker image
