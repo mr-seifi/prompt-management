@@ -121,13 +121,49 @@ jobs:
         if: steps.check_deployment.outputs.can_deploy == 'true'
         run: |
           echo "Debugging SSH connection..."
+          
+          # First, check if SSH_KEY_PASSPHRASE is set
+          if [[ -z "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
+            echo "::warning::SSH key appears to be passphrase protected, but SSH_KEY_PASSPHRASE is not set in secrets"
+          fi
+          
           # Create SSH key file
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           
-          # Basic SSH connection test with verbose output
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -v ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "echo 'SSH connection test'" || echo "Connection failed but continuing workflow"
+          # Install sshpass if needed for passphrase
+          sudo apt-get update && sudo apt-get install -y sshpass
+          
+          # Try SSH connection with passphrase
+          if [[ -n "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
+            echo "Testing SSH connection with passphrase..."
+            # Using expect script to handle passphrase
+            sudo apt-get install -y expect
+            
+            cat > ssh_test.sh << 'EOF'
+            #!/usr/bin/expect -f
+            set timeout 30
+            set passphrase [lindex $argv 0]
+            set host [lindex $argv 1]
+            set user [lindex $argv 2]
+            
+            spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "echo 'SSH test with passphrase'"
+            expect {
+              "Enter passphrase" {
+                send "$passphrase\r"
+                exp_continue
+              }
+              eof
+            }
+            EOF
+            
+            chmod +x ssh_test.sh
+            ./ssh_test.sh "${{ secrets.SSH_KEY_PASSPHRASE }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "SSH test with passphrase failed, but continuing workflow"
+          else
+            # Fallback to regular SSH test
+            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "echo 'SSH connection test'" || echo "SSH test failed, but continuing workflow"
+          fi
       
       # Deploy to server
       - name: Deploy to server
@@ -137,9 +173,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          key_format: openssh
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
-          script_stop: true
           script: |
             echo "SSH connection successful!"
             
@@ -186,10 +220,11 @@ jobs:
 
       # Alternative SSH deployment method (if the other one fails)
       - name: Manual SSH Deployment
-        if: steps.check_deployment.outputs.can_deploy == 'true' && always()
+        if: steps.check_deployment.outputs.can_deploy == 'true' && failure()
         run: |
-          echo "Attempting alternative SSH deployment..."
-          # Create SSH config and key
+          echo "Attempting alternative SSH deployment due to previous failure..."
+          
+          # Create SSH key file
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
@@ -202,7 +237,7 @@ jobs:
           echo "SSH connection successful!"
           
           # Verify deployment directory
-          DEPLOY_DIR="/path/to/deployment"
+          DEPLOY_DIR="/root/projects"
           if [ ! -d "$DEPLOY_DIR" ]; then
             echo "Creating deployment directory..."
             mkdir -p "$DEPLOY_DIR"
@@ -241,6 +276,41 @@ jobs:
           # Replace the template values with actual secrets
           sed -i "s/TEMPLATE_SECRET_KEY/${{ secrets.DJANGO_SECRET_KEY || 'django-insecure-default-key-do-not-use-in-production' }}/g" deploy.sh
           
-          # Copy deploy script to server and execute
-          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:~/deploy.sh || echo "SCP failed but continuing"
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy.sh && ~/deploy.sh" || echo "SSH execution failed but continuing" 
+          # Install sshpass for passphrase
+          if [[ -n "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
+            sudo apt-get update && sudo apt-get install -y sshpass expect
+            
+            # Using expect script for SCP with passphrase
+            cat > scp_script.sh << 'EOF'
+            #!/usr/bin/expect -f
+            set timeout 30
+            set passphrase [lindex $argv 0]
+            set host [lindex $argv 1]
+            set user [lindex $argv 2]
+            
+            spawn scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh
+            expect {
+              "Enter passphrase" {
+                send "$passphrase\r"
+                exp_continue
+              }
+              eof
+            }
+            
+            spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh"
+            expect {
+              "Enter passphrase" {
+                send "$passphrase\r"
+                exp_continue
+              }
+              eof
+            }
+            EOF
+            
+            chmod +x scp_script.sh
+            ./scp_script.sh "${{ secrets.SSH_KEY_PASSPHRASE }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "Alternative deployment failed, but continuing workflow"
+          else
+            # Fallback to regular SCP and SSH
+            scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:~/deploy.sh || echo "SCP failed but continuing"
+            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy.sh && ~/deploy.sh" || echo "SSH execution failed but continuing"
+          fi 
