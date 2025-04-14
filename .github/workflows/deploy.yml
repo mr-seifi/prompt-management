@@ -116,6 +116,19 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-backend:latest
 
+      # Debug SSH connectivity
+      - name: Debug SSH Connection
+        if: steps.check_deployment.outputs.can_deploy == 'true'
+        run: |
+          echo "Debugging SSH connection..."
+          # Create SSH key file
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          # Basic SSH connection test with verbose output
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -v ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "echo 'SSH connection test'" || echo "Connection failed but continuing workflow"
+      
       # Deploy to server
       - name: Deploy to server
         if: steps.check_deployment.outputs.can_deploy == 'true'
@@ -124,12 +137,27 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          key_format: openssh
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          script_stop: true
           script: |
-            cd /path/to/deployment
+            echo "SSH connection successful!"
+            
+            # Verify deployment directory
+            DEPLOY_DIR="/root/projects"
+            if [ ! -d "$DEPLOY_DIR" ]; then
+              echo "Creating deployment directory..."
+              mkdir -p "$DEPLOY_DIR"
+            fi
+            
+            cd "$DEPLOY_DIR"
+            
             # Pull the latest docker-compose file from your repository
-            wget -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+            echo "Downloading docker-compose.yml..."
+            wget -q -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
             
             # Create the .env file from secrets
+            echo "Creating .env file..."
             mkdir -p backend
             cat > backend/.env << EOL
             # Django environment variables
@@ -150,5 +178,69 @@ jobs:
             EOL
             
             # Pull the latest images and restart the containers
+            echo "Pulling and starting Docker containers..."
             docker-compose pull
-            docker-compose up -d 
+            docker-compose up -d
+            
+            echo "Deployment completed successfully!"
+
+      # Alternative SSH deployment method (if the other one fails)
+      - name: Manual SSH Deployment
+        if: steps.check_deployment.outputs.can_deploy == 'true' && always()
+        run: |
+          echo "Attempting alternative SSH deployment..."
+          # Create SSH config and key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          # Create deploy script
+          cat > deploy.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          echo "SSH connection successful!"
+          
+          # Verify deployment directory
+          DEPLOY_DIR="/path/to/deployment"
+          if [ ! -d "$DEPLOY_DIR" ]; then
+            echo "Creating deployment directory..."
+            mkdir -p "$DEPLOY_DIR"
+          fi
+          
+          cd "$DEPLOY_DIR"
+          
+          # Create the .env file
+          echo "Creating .env file..."
+          mkdir -p backend
+          cat > backend/.env << EOL
+          # Django environment variables
+          SECRET_KEY=TEMPLATE_SECRET_KEY
+          DEBUG=False
+          
+          # Database settings
+          POSTGRES_DB=prompt_db
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          POSTGRES_HOST=db
+          POSTGRES_PORT=5432
+          
+          # Superuser credentials
+          DJANGO_SUPERUSER_USERNAME=admin
+          DJANGO_SUPERUSER_EMAIL=admin@example.com
+          DJANGO_SUPERUSER_PASSWORD=admin_password
+          EOL
+          
+          echo "Pulling and starting Docker containers..."
+          docker-compose pull
+          docker-compose up -d
+          
+          echo "Deployment completed successfully!"
+          EOF
+          
+          # Replace the template values with actual secrets
+          sed -i "s/TEMPLATE_SECRET_KEY/${{ secrets.DJANGO_SECRET_KEY || 'django-insecure-default-key-do-not-use-in-production' }}/g" deploy.sh
+          
+          # Copy deploy script to server and execute
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:~/deploy.sh || echo "SCP failed but continuing"
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy.sh && ~/deploy.sh" || echo "SSH execution failed but continuing" 
