@@ -11,6 +11,25 @@ mkdir -p /app/staticfiles /app/media /app/static /app/templates /app/static/css
 # Set the correct permissions
 chmod -R 755 /app/staticfiles /app/media /app/static /app/templates
 
+# Ensure template files are in the right place
+if [ -f /app/static/index.html ] && [ ! -f /app/staticfiles/index.html ]; then
+    cp /app/static/index.html /app/staticfiles/
+fi
+
+if [ -f /app/templates/index.html ] && [ ! -f /app/static/index.html ]; then
+    cp /app/templates/index.html /app/static/
+fi
+
+if [ -f /app/static/index.html ] && [ ! -f /app/templates/index.html ]; then
+    cp /app/static/index.html /app/templates/
+fi
+
+# Copy static CSS files if they exist
+if [ -d /app/static/css ] && [ ! -d /app/staticfiles/css ]; then
+    mkdir -p /app/staticfiles/css
+    cp -r /app/static/css/* /app/staticfiles/css/ 2>/dev/null || true
+fi
+
 # Apply database migrations
 echo "Applying database migrations..."
 python manage.py migrate
