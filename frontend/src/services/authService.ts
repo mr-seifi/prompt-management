@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:8000/api/auth';
+const environment = process.env.REACT_APP_ENVIRONMENT || 'development';
+const API_URL = environment === 'production' 
+  ? process.env.REACT_APP_PRODUCTION_API_URL + "/auth"  // Use production URL
+  : process.env.REACT_APP_API_URL + "/auth" || 'http://localhost:8000/api/auth';  // Fallback to local URL
 
 // Token management
 const getToken = () => localStorage.getItem('accessToken');
