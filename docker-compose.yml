@@ -40,8 +40,7 @@ services:
   # Frontend service with Apache
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      image: aminseifi/prompt-manager-frontend:latest
     container_name: prompt-manager-frontend
     ports:
       - "8001:80"
