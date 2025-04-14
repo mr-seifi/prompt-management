@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Backend service
   backend:
-    image: ${DOCKER_HUB_USERNAME:-your-dockerhub-username}/prompt-manager-backend:latest
+    image: ${DOCKER_HUB_USERNAME:aminseifi}/prompt-manager-backend:latest
     container_name: prompt-manager-backend
     volumes:
       - ./backend/staticfiles:/app/staticfiles
@@ -37,9 +37,8 @@ services:
     networks:
       - prompt-network
 
-  # Add frontend service later
   # frontend:
-  #   image: ${DOCKER_HUB_USERNAME:-your-dockerhub-username}/prompt-manager-frontend:latest
+  #   image: ${DOCKER_HUB_USERNAME:aminseifi}/prompt-manager-frontend:latest
   #   container_name: prompt-manager-frontend
   #   ports:
   #     - "3000:3000"
