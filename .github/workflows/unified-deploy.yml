@@ -88,7 +88,7 @@ jobs:
       
       - name: Build
         working-directory: ./frontend
-        run: CI=false REACT_APP_API_URL=https://prompt-back.aminseifi.com/api REACT_APP_ENVIRONMENT=production REACT_APP_USE_MOCK_DATA=false npm run build
+        run: CI=false REACT_APP_API_URL=https://prompt-back.aminseifi.com/api REACT_APP_PRODUCTION_API_URL=https://prompt-back.aminseifi.com/api REACT_APP_ENVIRONMENT=production REACT_APP_USE_MOCK_DATA=false npm run build
       
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -153,6 +153,7 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-frontend:latest
           build-args: |
             REACT_APP_API_URL=https://prompt-back.aminseifi.com/api
+            REACT_APP_PRODUCTION_API_URL=https://prompt-back.aminseifi.com/api
             REACT_APP_ENVIRONMENT=production
             REACT_APP_USE_MOCK_DATA=false
 
