@@ -83,7 +83,7 @@ jobs:
           [[ -z "$DOCKER_PASSWORD" ]] && missing+=("DOCKER_HUB_TOKEN")
           [[ -z "${{ secrets.SERVER_HOST }}" ]] && missing+=("SERVER_HOST")
           [[ -z "${{ secrets.SERVER_USERNAME }}" ]] && missing+=("SERVER_USERNAME")
-          [[ -z "${{ secrets.SERVER_SSH_KEY }}" ]] && missing+=("SERVER_SSH_KEY")
+          [[ -z "${{ secrets.SERVER_PASSWORD }}" ]] && missing+=("SERVER_PASSWORD")
           [[ -z "${{ secrets.DJANGO_SECRET_KEY }}" ]] && missing+=("DJANGO_SECRET_KEY")
           
           if [[ ${#missing[@]} -gt 0 ]]; then
@@ -117,33 +117,20 @@ jobs:
         run: |
           echo "Debugging SSH connection..."
           
-          # First, check if SSH_KEY_PASSPHRASE is set
-          if [[ -z "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
-            echo "::warning::SSH key appears to be passphrase protected, but SSH_KEY_PASSPHRASE is not set in secrets"
-          fi
+          # Install sshpass for password authentication
+          sudo apt-get update && sudo apt-get install -y sshpass expect
           
-          # Create SSH key file
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          
-          # Install sshpass if needed for passphrase
-          sudo apt-get update && sudo apt-get install -y sshpass
-          
-          # Try SSH connection with passphrase
-          if [[ -n "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
-            echo "Testing SSH connection with passphrase..."
-            # Using expect script to handle passphrase without heredoc
-            sudo apt-get install -y expect
+          # Try SSH connection with password
+          if [[ -n "${{ secrets.SERVER_PASSWORD }}" ]]; then
+            echo "Testing SSH connection with password..."
             
-            # Create expect script with printf
-            printf '#!/usr/bin/expect -f\nset timeout 30\nset passphrase [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "echo '"'"'SSH test with passphrase'"'"'"\nexpect {\n  "Enter passphrase" {\n    send "$passphrase\\r"\n    exp_continue\n  }\n  eof\n}\n' > ssh_test.sh
+            # Create expect script with printf for password authentication
+            printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn ssh -o StrictHostKeyChecking=no $user@$host "echo '"'"'SSH test with password'"'"'"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > ssh_test.sh
             
             chmod +x ssh_test.sh
-            ./ssh_test.sh "${{ secrets.SSH_KEY_PASSPHRASE }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "SSH test with passphrase failed, but continuing workflow"
+            ./ssh_test.sh "${{ secrets.SERVER_PASSWORD }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "SSH test with password failed, but continuing workflow"
           else
-            # Fallback to regular SSH test
-            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "echo 'SSH connection test'" || echo "SSH test failed, but continuing workflow"
+            echo "::warning::SERVER_PASSWORD is not set in secrets"
           fi
       
       # Deploy to server
@@ -153,8 +140,7 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             echo "SSH connection successful!"
             
@@ -205,50 +191,23 @@ jobs:
         run: |
           echo "Attempting alternative SSH deployment due to previous failure..."
           
-          # Create SSH key file
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+          # Install sshpass if needed for password authentication
+          sudo apt-get update && sudo apt-get install -y sshpass expect
           
           # Create remotely executed script with env variables passed securely using printf
           printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\nEOL\n\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh
 
-          # Install sshpass for passphrase
-          if [[ -n "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
-            sudo apt-get update && sudo apt-get install -y sshpass expect
-            
-            # Using expect script for SCP with passphrase without heredoc
-            printf '#!/usr/bin/expect -f\nset timeout 30\nset passphrase [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh\nexpect {\n  "Enter passphrase" {\n    send "$passphrase\\r"\n    exp_continue\n  }\n  eof\n}\n\n# Run the script with environment variables\nspawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo '"'"'Creating secure env file'"'"' && cat > /root/projects/backend/.env << '"'"'EOL'"'"'\nSECRET_KEY=\\"$env(SECRET_KEY)\\"\nDEBUG=\\"$env(DEBUG)\\"\nPOSTGRES_DB=\\"$env(POSTGRES_DB)\\"\nPOSTGRES_USER=\\"$env(POSTGRES_USER)\\"\nPOSTGRES_PASSWORD=\\"$env(POSTGRES_PASSWORD)\\"\nPOSTGRES_HOST=db\nPOSTGRES_PORT=5432\nDJANGO_SUPERUSER_USERNAME=\\"$env(DJANGO_SUPERUSER_USERNAME)\\"\nDJANGO_SUPERUSER_EMAIL=\\"$env(DJANGO_SUPERUSER_EMAIL)\\"\nDJANGO_SUPERUSER_PASSWORD=\\"$env(DJANGO_SUPERUSER_PASSWORD)\\"\nEOL"\n\nexpect {\n  "Enter passphrase" {\n    send "$passphrase\\r"\n    exp_continue\n  }\n  eof\n}\n' > scp_script.sh
-            
-            chmod +x scp_script.sh
-            export SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
-            export DEBUG="${{ secrets.DEBUG }}"
-            export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
-            export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
-            export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
-            export DJANGO_SUPERUSER_USERNAME="${{ secrets.DJANGO_SUPERUSER_USERNAME }}"
-            export DJANGO_SUPERUSER_EMAIL="${{ secrets.DJANGO_SUPERUSER_EMAIL }}"
-            export DJANGO_SUPERUSER_PASSWORD="${{ secrets.DJANGO_SUPERUSER_PASSWORD }}"
-            ./scp_script.sh "${{ secrets.SSH_KEY_PASSPHRASE }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "Alternative deployment failed, but continuing workflow"
-          else
-            # Fallback to regular SCP and SSH with environment variables
-            scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:~/deploy.sh || echo "SCP failed but continuing"
-            
-            # Create a temporary file with environment variables using printf
-            printf "SECRET_KEY='%s'\nDEBUG='%s'\nPOSTGRES_DB='%s'\nPOSTGRES_USER='%s'\nPOSTGRES_PASSWORD='%s'\nPOSTGRES_HOST='db'\nPOSTGRES_PORT='5432'\nDJANGO_SUPERUSER_USERNAME='%s'\nDJANGO_SUPERUSER_EMAIL='%s'\nDJANGO_SUPERUSER_PASSWORD='%s'\n" \
-              "${{ secrets.DJANGO_SECRET_KEY }}" \
-              "${{ secrets.DEBUG }}" \
-              "${{ secrets.POSTGRES_DB }}" \
-              "${{ secrets.POSTGRES_USER }}" \
-              "${{ secrets.POSTGRES_PASSWORD }}" \
-              "${{ secrets.DJANGO_SUPERUSER_USERNAME }}" \
-              "${{ secrets.DJANGO_SUPERUSER_EMAIL }}" \
-              "${{ secrets.DJANGO_SUPERUSER_PASSWORD }}" > env_vars.txt
-            
-            # Send environment variables and execute deployment
-            cat env_vars.txt | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy.sh && ~/deploy.sh && cat > /root/projects/backend/.env" || echo "SSH execution failed but continuing"
-            
-            # Remove temporary file
-            rm env_vars.txt
-          fi
+          # Using expect script for SCP with password
+          printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn scp -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh\nexpect "password:"\nsend "$password\\r"\nexpect eof\n\n# Run the script with environment variables\nspawn ssh -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo '"'"'Creating secure env file'"'"' && cat > /root/projects/backend/.env << '"'"'EOL'"'"'\nSECRET_KEY='"'"'$env(SECRET_KEY)'"'"'\nDEBUG='"'"'$env(DEBUG)'"'"'\nPOSTGRES_DB='"'"'$env(POSTGRES_DB)'"'"'\nPOSTGRES_USER='"'"'$env(POSTGRES_USER)'"'"'\nPOSTGRES_PASSWORD='"'"'$env(POSTGRES_PASSWORD)'"'"'\nPOSTGRES_HOST=db\nPOSTGRES_PORT=5432\nDJANGO_SUPERUSER_USERNAME='"'"'$env(DJANGO_SUPERUSER_USERNAME)'"'"'\nDJANGO_SUPERUSER_EMAIL='"'"'$env(DJANGO_SUPERUSER_EMAIL)'"'"'\nDJANGO_SUPERUSER_PASSWORD='"'"'$env(DJANGO_SUPERUSER_PASSWORD)'"'"'\nEOL"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > scp_script.sh
+          
+          chmod +x scp_script.sh
+          export SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
+          export DEBUG="${{ secrets.DEBUG }}"
+          export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
+          export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
+          export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
+          export DJANGO_SUPERUSER_USERNAME="${{ secrets.DJANGO_SUPERUSER_USERNAME }}"
+          export DJANGO_SUPERUSER_EMAIL="${{ secrets.DJANGO_SUPERUSER_EMAIL }}"
+          export DJANGO_SUPERUSER_PASSWORD="${{ secrets.DJANGO_SUPERUSER_PASSWORD }}"
+          ./scp_script.sh "${{ secrets.SERVER_PASSWORD }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "Alternative deployment failed, but continuing workflow"
 
