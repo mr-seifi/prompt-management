@@ -39,8 +39,7 @@ services:
 
   # Frontend service with Apache
   frontend:
-    build:
-      image: aminseifi/prompt-manager-frontend:latest
+    image: aminseifi/prompt-manager-frontend:latest
     container_name: prompt-manager-frontend
     ports:
       - "8001:80"
