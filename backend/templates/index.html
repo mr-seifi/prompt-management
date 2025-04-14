@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Management System</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Prompt Management System</h1>
+        <p>Static files are working correctly!</p>
+        
+        <h2>Available Links:</h2>
+        <ul>
+            <li><a href="{% url 'admin:index' %}">Admin Interface</a></li>
+            <li><a href="{% url 'schema-swagger-ui' %}">API Documentation (Swagger)</a></li>
+            <li><a href="{% url 'schema-redoc' %}">API Documentation (ReDoc)</a></li>
+            <li><a href="/api/prompts/">Prompts API</a></li>
+            <li><a href="/api/auth/login/">Authentication API</a></li>
+        </ul>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Backend service
+  backend:
+    build: ./backend
+    container_name: prompt-manager-backend-dev
+    volumes:
+      - ./backend:/app
+      - ./backend/staticfiles:/app/staticfiles
+      - ./backend/media:/app/media
+      - ./backend/static:/app/static
+      - ./backend/templates:/app/templates
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./backend/.env
+    command: >
+      sh -c "chmod +x /app/init.sh && 
+             /app/init.sh"
+    restart: unless-stopped
+    networks:
+      - prompt-network
+
+  # Database service
+  db:
+    image: postgres:15-alpine
+    container_name: prompt-manager-db-dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - prompt-network
+
+  # Add frontend service later
+  # frontend:
+  #   build: ./frontend
+  #   container_name: prompt-manager-frontend-dev
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend
+  #   environment:
+  #     - REACT_APP_API_URL=http://localhost:8000/api
+  #   restart: unless-stopped
+  #   networks:
+  #     - prompt-network
+
+volumes:
+  postgres_data:
+
+networks:
+  prompt-network:
+    driver: bridge 

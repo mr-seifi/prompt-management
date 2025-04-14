@@ -1,0 +1,16 @@
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# they will be requested for review when someone opens a pull request.
+* @ferferof
+
+# Backend code
+/backend/ @ferferof
+
+# Frontend code (when added)
+# /frontend/ @frontend-maintainer
+
+# CI/CD pipelines
+/.github/workflows/ @ferferof
+
+# Documentation
+/*.md @ferferof 
