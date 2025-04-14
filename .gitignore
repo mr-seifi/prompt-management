@@ -35,6 +35,8 @@ db.sqlite3
 db.sqlite3-journal
 media
 static/
+staticfiles/
+media/
 
 # IDE & Editors
 .idea/

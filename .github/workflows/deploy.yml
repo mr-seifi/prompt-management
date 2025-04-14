@@ -13,6 +13,21 @@ jobs:
     name: Test Application
     runs-on: ubuntu-latest
     
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,9 +43,28 @@ jobs:
           cd backend
           pip install -r requirements.txt
           
+      - name: Set up test environment
+        run: |
+          cd backend
+          echo "SECRET_KEY='django-test-key-super-secret-123'" > .env
+          echo "DEBUG=False" >> .env
+          echo "POSTGRES_DB=test_db" >> .env
+          echo "POSTGRES_USER=postgres" >> .env
+          echo "POSTGRES_PASSWORD=postgres" >> .env
+          echo "POSTGRES_HOST=localhost" >> .env
+          echo "POSTGRES_PORT=5432" >> .env
+          echo "CI=True" >> .env
+          
       - name: Run tests
         run: |
           cd backend
+          export CI=True
+          export SECRET_KEY='django-test-key-super-secret-123'
+          export POSTGRES_HOST=localhost
+          export POSTGRES_PORT=5432
+          export POSTGRES_DB=test_db
+          export POSTGRES_USER=postgres
+          export POSTGRES_PASSWORD=postgres
           python manage.py test
           
   build-and-deploy:
@@ -42,6 +76,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      
+      # Verify required secrets are available
+      - name: Check Required Secrets
+        run: |
+          missing_secrets=()
+          
+          # Docker Hub secrets
+          [ -z "${{ secrets.DOCKER_HUB_USERNAME }}" ] && missing_secrets+=("DOCKER_HUB_USERNAME")
+          [ -z "${{ secrets.DOCKER_HUB_TOKEN }}" ] && missing_secrets+=("DOCKER_HUB_TOKEN")
+          
+          # Server deployment secrets
+          [ -z "${{ secrets.SERVER_HOST }}" ] && missing_secrets+=("SERVER_HOST")
+          [ -z "${{ secrets.SERVER_USERNAME }}" ] && missing_secrets+=("SERVER_USERNAME")
+          [ -z "${{ secrets.SERVER_SSH_KEY }}" ] && missing_secrets+=("SERVER_SSH_KEY")
+          
+          # Django secrets
+          [ -z "${{ secrets.DJANGO_SECRET_KEY }}" ] && missing_secrets+=("DJANGO_SECRET_KEY")
+          
+          if [ ${#missing_secrets[@]} -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing_secrets[*]}"
+            echo "Please add these secrets to your GitHub repository settings."
+            exit 1
+          fi
+          
+          echo "All required secrets are available."
         
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -51,6 +110,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Check Docker Hub Credentials
+        run: |
+          if [ -z "${{ secrets.DOCKER_HUB_USERNAME }}" ] || [ -z "${{ secrets.DOCKER_HUB_TOKEN }}" ]; then
+            echo "::error::Docker Hub credentials are missing. Please add DOCKER_HUB_USERNAME and DOCKER_HUB_TOKEN to your GitHub repository secrets."
+            exit 1
+          fi
           
       - name: Build and push backend image
         uses: docker/build-push-action@v4
