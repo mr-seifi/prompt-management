@@ -45,8 +45,11 @@ services:
       - "8001:80"
     depends_on:
       - backend
-    env_file:
-      - ./frontend/.env
+    environment:
+      - REACT_APP_API_URL=https://prompt-back.aminseifi.com/api
+      - REACT_APP_PRODUCTION_API_URL=https://prompt-back.aminseifi.com/api
+      - REACT_APP_ENVIRONMENT=production
+      - REACT_APP_USE_MOCK_DATA=false
     restart: unless-stopped
     networks:
       - prompt-network
