@@ -210,6 +210,17 @@ jobs:
             DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL }}
             DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
             EOL
+
+            # Create frontend .env file
+            echo "Creating frontend .env file..."
+            mkdir -p frontend
+            cat > frontend/.env << EOL
+            # React environment variables
+            REACT_APP_API_URL=https://prompt-back.aminseifi.com/api
+            REACT_APP_PRODUCTION_API_URL=https://prompt-back.aminseifi.com/api
+            REACT_APP_ENVIRONMENT=production
+            REACT_APP_USE_MOCK_DATA=false
+            EOL
             
             # Pull the latest images and restart the containers
             echo "Pulling and starting Docker containers..."
