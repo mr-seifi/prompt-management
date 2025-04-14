@@ -17,9 +17,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
+          POSTGRES_USER: ${{ secrets.TEST_DB_USER || 'postgres' }}
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD || 'postgres' }}
+          POSTGRES_DB: ${{ secrets.TEST_DB_NAME || 'test_db' }}
         ports:
           - 5432:5432
         options: >-
@@ -46,11 +46,11 @@ jobs:
       - name: Set up test environment
         run: |
           cd backend
-          echo "SECRET_KEY='django-test-key-super-secret-123'" > .env
+          echo "SECRET_KEY='${{ secrets.TEST_SECRET_KEY || 'django-test-key-ci-only' }}'" > .env
           echo "DEBUG=False" >> .env
-          echo "POSTGRES_DB=test_db" >> .env
-          echo "POSTGRES_USER=postgres" >> .env
-          echo "POSTGRES_PASSWORD=postgres" >> .env
+          echo "POSTGRES_DB=${{ secrets.TEST_DB_NAME || 'test_db' }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.TEST_DB_USER || 'postgres' }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.TEST_DB_PASSWORD || 'postgres' }}" >> .env
           echo "POSTGRES_HOST=localhost" >> .env
           echo "POSTGRES_PORT=5432" >> .env
           echo "CI=True" >> .env
@@ -58,13 +58,6 @@ jobs:
       - name: Run tests
         run: |
           cd backend
-          export CI=True
-          export SECRET_KEY='django-test-key-super-secret-123'
-          export POSTGRES_HOST=localhost
-          export POSTGRES_PORT=5432
-          export POSTGRES_DB=test_db
-          export POSTGRES_USER=postgres
-          export POSTGRES_PASSWORD=postgres
           python manage.py test
           
   build-and-deploy:
@@ -90,6 +83,7 @@ jobs:
           [[ -z "${{ secrets.SERVER_HOST }}" ]] && missing+=("SERVER_HOST")
           [[ -z "${{ secrets.SERVER_USERNAME }}" ]] && missing+=("SERVER_USERNAME")
           [[ -z "${{ secrets.SERVER_SSH_KEY }}" ]] && missing+=("SERVER_SSH_KEY")
+          [[ -z "${{ secrets.DJANGO_SECRET_KEY }}" ]] && missing+=("DJANGO_SECRET_KEY")
           
           if [[ ${#missing[@]} -gt 0 ]]; then
             echo "::warning::Missing secrets: ${missing[*]}"
@@ -141,22 +135,22 @@ jobs:
             # Using expect script to handle passphrase
             sudo apt-get install -y expect
             
-            cat > ssh_test.sh << 'EOF'
-            #!/usr/bin/expect -f
-            set timeout 30
-            set passphrase [lindex $argv 0]
-            set host [lindex $argv 1]
-            set user [lindex $argv 2]
-            
-            spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "echo 'SSH test with passphrase'"
-            expect {
-              "Enter passphrase" {
-                send "$passphrase\r"
-                exp_continue
-              }
-              eof
-            }
-            EOF
+            cat > ssh_test.sh << "EOFMARKER"
+#!/usr/bin/expect -f
+set timeout 30
+set passphrase [lindex $argv 0]
+set host [lindex $argv 1]
+set user [lindex $argv 2]
+
+spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "echo 'SSH test with passphrase'"
+expect {
+  "Enter passphrase" {
+    send "$passphrase\r"
+    exp_continue
+  }
+  eof
+}
+EOFMARKER
             
             chmod +x ssh_test.sh
             ./ssh_test.sh "${{ secrets.SSH_KEY_PASSPHRASE }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "SSH test with passphrase failed, but continuing workflow"
@@ -195,20 +189,20 @@ jobs:
             mkdir -p backend
             cat > backend/.env << EOL
             # Django environment variables
-            SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY || 'django-insecure-default-key-do-not-use-in-production' }}
-            DEBUG=${{ secrets.DEBUG || 'False' }}
+            SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+            DEBUG=${{ secrets.DEBUG }}
             
             # Database settings
-            POSTGRES_DB=${{ secrets.POSTGRES_DB || 'prompt_db' }}
-            POSTGRES_USER=${{ secrets.POSTGRES_USER || 'postgres' }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_HOST=db
             POSTGRES_PORT=5432
             
             # Superuser credentials
-            DJANGO_SUPERUSER_USERNAME=${{ secrets.DJANGO_SUPERUSER_USERNAME || 'admin' }}
-            DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL || 'admin@example.com' }}
-            DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD || 'admin_password' }}
+            DJANGO_SUPERUSER_USERNAME=${{ secrets.DJANGO_SUPERUSER_USERNAME }}
+            DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+            DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
             EOL
             
             # Pull the latest images and restart the containers
@@ -229,88 +223,111 @@ jobs:
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           
-          # Create deploy script
-          cat > deploy.sh << 'EOF'
-          #!/bin/bash
-          set -e
-          
-          echo "SSH connection successful!"
-          
-          # Verify deployment directory
-          DEPLOY_DIR="/root/projects"
-          if [ ! -d "$DEPLOY_DIR" ]; then
-            echo "Creating deployment directory..."
-            mkdir -p "$DEPLOY_DIR"
-          fi
-          
-          cd "$DEPLOY_DIR"
-          
-          # Create the .env file
-          echo "Creating .env file..."
-          mkdir -p backend
-          cat > backend/.env << EOL
-          # Django environment variables
-          SECRET_KEY=TEMPLATE_SECRET_KEY
-          DEBUG=False
-          
-          # Database settings
-          POSTGRES_DB=prompt_db
-          POSTGRES_USER=postgres
-          POSTGRES_PASSWORD=postgres
-          POSTGRES_HOST=db
-          POSTGRES_PORT=5432
-          
-          # Superuser credentials
-          DJANGO_SUPERUSER_USERNAME=admin
-          DJANGO_SUPERUSER_EMAIL=admin@example.com
-          DJANGO_SUPERUSER_PASSWORD=admin_password
-          EOL
-          
-          echo "Pulling and starting Docker containers..."
-          docker-compose pull
-          docker-compose up -d
-          
-          echo "Deployment completed successfully!"
-          EOF
-          
-          # Replace the template values with actual secrets
-          sed -i "s/TEMPLATE_SECRET_KEY/${{ secrets.DJANGO_SECRET_KEY || 'django-insecure-default-key-do-not-use-in-production' }}/g" deploy.sh
+          # Create remotely executed script with env variables passed securely
+          cat > deploy.sh << "DEPLOY_EOF"
+#!/bin/bash
+set -e
+
+echo "SSH connection successful!"
+
+# Verify deployment directory
+DEPLOY_DIR="/root/projects"
+if [ ! -d "$DEPLOY_DIR" ]; then
+  echo "Creating deployment directory..."
+  mkdir -p "$DEPLOY_DIR"
+fi
+
+cd "$DEPLOY_DIR"
+
+# Create the .env file - values will be sent securely via SSH
+echo "Creating .env file..."
+mkdir -p backend
+cat > backend/.env << EOL
+# Variables will be populated by secure environment transfer
+EOL
+
+echo "Pulling and starting Docker containers..."
+docker-compose pull
+docker-compose up -d
+
+echo "Deployment completed successfully!"
+DEPLOY_EOF
           
           # Install sshpass for passphrase
           if [[ -n "${{ secrets.SSH_KEY_PASSPHRASE }}" ]]; then
             sudo apt-get update && sudo apt-get install -y sshpass expect
             
             # Using expect script for SCP with passphrase
-            cat > scp_script.sh << 'EOF'
-            #!/usr/bin/expect -f
-            set timeout 30
-            set passphrase [lindex $argv 0]
-            set host [lindex $argv 1]
-            set user [lindex $argv 2]
-            
-            spawn scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh
-            expect {
-              "Enter passphrase" {
-                send "$passphrase\r"
-                exp_continue
-              }
-              eof
-            }
-            
-            spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh"
-            expect {
-              "Enter passphrase" {
-                send "$passphrase\r"
-                exp_continue
-              }
-              eof
-            }
-            EOF
+            cat > scp_script.sh << "SCP_EOF"
+#!/usr/bin/expect -f
+set timeout 30
+set passphrase [lindex $argv 0]
+set host [lindex $argv 1]
+set user [lindex $argv 2]
+
+spawn scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh
+expect {
+  "Enter passphrase" {
+    send "$passphrase\r"
+    exp_continue
+  }
+  eof
+}
+
+# Run the script with environment variables
+spawn ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo 'Creating secure env file' && cat > /root/projects/backend/.env << 'EOL'
+SECRET_KEY=\"$env(SECRET_KEY)\"
+DEBUG=\"$env(DEBUG)\"
+POSTGRES_DB=\"$env(POSTGRES_DB)\"
+POSTGRES_USER=\"$env(POSTGRES_USER)\"
+POSTGRES_PASSWORD=\"$env(POSTGRES_PASSWORD)\"
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+DJANGO_SUPERUSER_USERNAME=\"$env(DJANGO_SUPERUSER_USERNAME)\"
+DJANGO_SUPERUSER_EMAIL=\"$env(DJANGO_SUPERUSER_EMAIL)\"
+DJANGO_SUPERUSER_PASSWORD=\"$env(DJANGO_SUPERUSER_PASSWORD)\"
+EOL"
+
+expect {
+  "Enter passphrase" {
+    send "$passphrase\r"
+    exp_continue
+  }
+  eof
+}
+SCP_EOF
             
             chmod +x scp_script.sh
+            export SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
+            export DEBUG="${{ secrets.DEBUG }}"
+            export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
+            export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
+            export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
+            export DJANGO_SUPERUSER_USERNAME="${{ secrets.DJANGO_SUPERUSER_USERNAME }}"
+            export DJANGO_SUPERUSER_EMAIL="${{ secrets.DJANGO_SUPERUSER_EMAIL }}"
+            export DJANGO_SUPERUSER_PASSWORD="${{ secrets.DJANGO_SUPERUSER_PASSWORD }}"
             ./scp_script.sh "${{ secrets.SSH_KEY_PASSPHRASE }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "Alternative deployment failed, but continuing workflow"
           else
-            # Fallback to regular SCP and SSH
+            # Fallback to regular SCP and SSH with environment variables
             scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy.sh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:~/deploy.sh || echo "SCP failed but continuing"
-            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy.sh && ~/deploy.sh" || echo "SSH execution failed but continuing"
+            
+            # Create a temporary file with environment variables that will be securely sent via SSH
+            cat > env_vars.txt << EOL
+SECRET_KEY='${{ secrets.DJANGO_SECRET_KEY }}'
+DEBUG='${{ secrets.DEBUG }}'
+POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
+POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
+POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
+POSTGRES_HOST='db'
+POSTGRES_PORT='5432'
+DJANGO_SUPERUSER_USERNAME='${{ secrets.DJANGO_SUPERUSER_USERNAME }}'
+DJANGO_SUPERUSER_EMAIL='${{ secrets.DJANGO_SUPERUSER_EMAIL }}'
+DJANGO_SUPERUSER_PASSWORD='${{ secrets.DJANGO_SUPERUSER_PASSWORD }}'
+EOL
+            
+            # Send environment variables and execute deployment
+            cat env_vars.txt | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy.sh && ~/deploy.sh && cat > /root/projects/backend/.env" || echo "SSH execution failed but continuing"
+            
+            # Remove temporary file
+            rm env_vars.txt
           fi 
