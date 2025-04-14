@@ -104,14 +104,26 @@ DATABASES = {
     }
 }
 
-# For development, you can use SQLite if needed
-if DEBUG:
+# For development or testing with SQLite
+if DEBUG and not os.environ.get("CI"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+# Special case for testing environments
+import sys
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    # Use faster SQLite for testing unless PostgreSQL is specifically configured
+    if not os.environ.get("POSTGRES_HOST"):
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'test_db.sqlite3',
+            }
+        }
 
 
 # Password validation
