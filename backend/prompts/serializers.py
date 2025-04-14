@@ -60,7 +60,8 @@ class PromptCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Prompt
-        fields = ['title', 'description', 'variables_schema', 'detected_variables', 'favorite']
+        fields = ['id', 'title', 'description', 'variables_schema', 'detected_variables', 'favorite']
+        read_only_fields = ['id']
         
     def get_detected_variables(self, obj):
         """Return variables detected in the prompt template"""

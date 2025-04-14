@@ -203,6 +203,9 @@ class PromptAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Prompt.objects.count(), 3)
         self.assertEqual(Prompt.objects.latest('id').title, 'New Test Prompt')
+        # Verify ID is included in the response
+        self.assertIn('id', response.data)
+        self.assertIsNotNone(response.data['id'])
     
     def test_create_template_prompt(self):
         """Test that a template prompt can be created through the API."""
@@ -225,6 +228,10 @@ class PromptAPITest(APITestCase):
         
         # Check that variables were detected
         self.assertEqual(set(response.data['detected_variables']), {'user', 'code'})
+        
+        # Verify ID is included in the response
+        self.assertIn('id', response.data)
+        self.assertIsNotNone(response.data['id'])
     
     def test_get_prompt_list(self):
         """Test that a list of prompts can be retrieved by the owner."""
