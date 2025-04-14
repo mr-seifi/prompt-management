@@ -1,275 +1,212 @@
-# Validating workflow syntax
-name: Deploy Prompt Management System
+# # Validating workflow syntax
+# name: Deploy Prompt Management System
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
-    # Allow manual triggering
-  repository_dispatch:
-    types: [frontend-deployed]
+# on:
+#   push:
+#     branches: [ main, master ]
+#   pull_request:
+#     branches: [ main, master ]
+#   workflow_dispatch:
+#     # Allow manual triggering
 
-jobs:
-  test:
-    name: Test Application
-    runs-on: ubuntu-latest
+# jobs:
+#   test:
+#     name: Test Application
+#     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: ${{ secrets.TEST_DB_USER != '' && secrets.TEST_DB_USER || 'postgres' }}
-          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD != '' && secrets.TEST_DB_PASSWORD || 'postgres' }}
-          POSTGRES_DB: ${{ secrets.TEST_DB_NAME != '' && secrets.TEST_DB_NAME || 'test_db' }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+#     services:
+#       postgres:
+#         image: postgres:15-alpine
+#         env:
+#           POSTGRES_USER: ${{ secrets.TEST_DB_USER != '' && secrets.TEST_DB_USER || 'postgres' }}
+#           POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD != '' && secrets.TEST_DB_PASSWORD || 'postgres' }}
+#           POSTGRES_DB: ${{ secrets.TEST_DB_NAME != '' && secrets.TEST_DB_NAME || 'test_db' }}
+#         ports:
+#           - 5432:5432
+#         options: >-
+#           --health-cmd pg_isready
+#           --health-interval 10s
+#           --health-timeout 5s
+#           --health-retries 5
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
       
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.10'
           
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          cd backend
-          pip install -r requirements.txt
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           cd backend
+#           pip install -r requirements.txt
           
-      - name: Set up test environment
-        run: |
-          cd backend
-          echo "SECRET_KEY='${{ secrets.TEST_SECRET_KEY != '' && secrets.TEST_SECRET_KEY || 'django-test-key-ci-only' }}'" > .env
-          echo "DEBUG=False" >> .env
-          echo "POSTGRES_DB=${{ secrets.TEST_DB_NAME != '' && secrets.TEST_DB_NAME || 'test_db' }}" >> .env
-          echo "POSTGRES_USER=${{ secrets.TEST_DB_USER != '' && secrets.TEST_DB_USER || 'postgres' }}" >> .env
-          echo "POSTGRES_PASSWORD=${{ secrets.TEST_DB_PASSWORD != '' && secrets.TEST_DB_PASSWORD || 'postgres' }}" >> .env
-          echo "POSTGRES_HOST=localhost" >> .env
-          echo "POSTGRES_PORT=5432" >> .env
-          echo "CI=True" >> .env
+#       - name: Set up test environment
+#         run: |
+#           cd backend
+#           echo "SECRET_KEY='${{ secrets.TEST_SECRET_KEY != '' && secrets.TEST_SECRET_KEY || 'django-test-key-ci-only' }}'" > .env
+#           echo "DEBUG=False" >> .env
+#           echo "POSTGRES_DB=${{ secrets.TEST_DB_NAME != '' && secrets.TEST_DB_NAME || 'test_db' }}" >> .env
+#           echo "POSTGRES_USER=${{ secrets.TEST_DB_USER != '' && secrets.TEST_DB_USER || 'postgres' }}" >> .env
+#           echo "POSTGRES_PASSWORD=${{ secrets.TEST_DB_PASSWORD != '' && secrets.TEST_DB_PASSWORD || 'postgres' }}" >> .env
+#           echo "POSTGRES_HOST=localhost" >> .env
+#           echo "POSTGRES_PORT=5432" >> .env
+#           echo "CI=True" >> .env
           
-      - name: Run tests
-        run: |
-          cd backend
-          python manage.py test
+#       - name: Run tests
+#         run: |
+#           cd backend
+#           python manage.py test
           
-  build-and-deploy:
-    name: Build and Deploy
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch'
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_TOKEN }}
+#   build-and-deploy:
+#     name: Build and Deploy
+#     needs: test
+#     runs-on: ubuntu-latest
+#     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+#     env:
+#       DOCKER_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+#       DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_TOKEN }}
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
       
-      # Check if required secrets are available
-      - name: Check deployment prerequisites
-        id: check_deployment
-        run: |
-          missing=()
-          [[ -z "$DOCKER_USERNAME" ]] && missing+=("DOCKER_HUB_USERNAME")
-          [[ -z "$DOCKER_PASSWORD" ]] && missing+=("DOCKER_HUB_TOKEN")
-          [[ -z "${{ secrets.SERVER_HOST }}" ]] && missing+=("SERVER_HOST")
-          [[ -z "${{ secrets.SERVER_USERNAME }}" ]] && missing+=("SERVER_USERNAME")
-          [[ -z "${{ secrets.SERVER_PASSWORD }}" ]] && missing+=("SERVER_PASSWORD")
-          [[ -z "${{ secrets.DJANGO_SECRET_KEY }}" ]] && missing+=("DJANGO_SECRET_KEY")
+#       # Check if required secrets are available
+#       - name: Check deployment prerequisites
+#         id: check_deployment
+#         run: |
+#           missing=()
+#           [[ -z "$DOCKER_USERNAME" ]] && missing+=("DOCKER_HUB_USERNAME")
+#           [[ -z "$DOCKER_PASSWORD" ]] && missing+=("DOCKER_HUB_TOKEN")
+#           [[ -z "${{ secrets.SERVER_HOST }}" ]] && missing+=("SERVER_HOST")
+#           [[ -z "${{ secrets.SERVER_USERNAME }}" ]] && missing+=("SERVER_USERNAME")
+#           [[ -z "${{ secrets.SERVER_PASSWORD }}" ]] && missing+=("SERVER_PASSWORD")
+#           [[ -z "${{ secrets.DJANGO_SECRET_KEY }}" ]] && missing+=("DJANGO_SECRET_KEY")
           
-          if [[ ${#missing[@]} -gt 0 ]]; then
-            echo "::warning::Missing secrets: ${missing[*]}"
-            echo "can_deploy=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+#           if [[ ${#missing[@]} -gt 0 ]]; then
+#             echo "::warning::Missing secrets: ${missing[*]}"
+#             echo "can_deploy=false" >> $GITHUB_OUTPUT
+#             exit 0
+#           fi
           
-          echo "can_deploy=true" >> $GITHUB_OUTPUT
+#           echo "can_deploy=true" >> $GITHUB_OUTPUT
           
-      # Login to Docker Hub
-      - name: Login to Docker Hub
-        if: steps.check_deployment.outputs.can_deploy == 'true'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+#       # Login to Docker Hub
+#       - name: Login to Docker Hub
+#         if: steps.check_deployment.outputs.can_deploy == 'true'
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # Only build backend if this is not triggered by frontend deployment
-      - name: Build and push Backend Docker image
-        if: steps.check_deployment.outputs.can_deploy == 'true' && github.event_name != 'repository_dispatch'
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-backend:latest
+#       # Build and push Docker image
+#       - name: Build and push Docker image
+#         if: steps.check_deployment.outputs.can_deploy == 'true'
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: ./backend
+#           push: true
+#           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-backend:latest
 
-      # Debug SSH connectivity
-      - name: Debug SSH Connection
-        if: steps.check_deployment.outputs.can_deploy == 'true'
-        run: |
-          echo "Debugging SSH connection..."
+#       # Debug SSH connectivity
+#       - name: Debug SSH Connection
+#         if: steps.check_deployment.outputs.can_deploy == 'true'
+#         run: |
+#           echo "Debugging SSH connection..."
           
-          # Install sshpass for password authentication
-          sudo apt-get update && sudo apt-get install -y sshpass expect
+#           # Install sshpass for password authentication
+#           sudo apt-get update && sudo apt-get install -y sshpass expect
           
-          # Try SSH connection with password
-          if [[ -n "${{ secrets.SERVER_PASSWORD }}" ]]; then
-            echo "Testing SSH connection with password..."
+#           # Try SSH connection with password
+#           if [[ -n "${{ secrets.SERVER_PASSWORD }}" ]]; then
+#             echo "Testing SSH connection with password..."
             
-            # Create expect script with printf for password authentication
-            printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn ssh -o StrictHostKeyChecking=no $user@$host "echo '"'"'SSH test with password'"'"'"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > ssh_test.sh
+#             # Create expect script with printf for password authentication
+#             printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn ssh -o StrictHostKeyChecking=no $user@$host "echo '"'"'SSH test with password'"'"'"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > ssh_test.sh
             
-            chmod +x ssh_test.sh
-            ./ssh_test.sh "${{ secrets.SERVER_PASSWORD }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "SSH test with password failed, but continuing workflow"
-          else
-            echo "::warning::SERVER_PASSWORD is not set in secrets"
-          fi
+#             chmod +x ssh_test.sh
+#             ./ssh_test.sh "${{ secrets.SERVER_PASSWORD }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "SSH test with password failed, but continuing workflow"
+#           else
+#             echo "::warning::SERVER_PASSWORD is not set in secrets"
+#           fi
       
-      # Deploy to server
-      - name: Deploy to server
-        if: steps.check_deployment.outputs.can_deploy == 'true'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            echo "SSH connection successful!"
+#       # Deploy to server
+#       - name: Deploy to server
+#         if: steps.check_deployment.outputs.can_deploy == 'true'
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ secrets.SERVER_HOST }}
+#           username: ${{ secrets.SERVER_USERNAME }}
+#           password: ${{ secrets.SERVER_PASSWORD }}
+#           script: |
+#             echo "SSH connection successful!"
             
-            # Verify deployment directory
-            DEPLOY_DIR="/root/projects"
-            if [ ! -d "$DEPLOY_DIR" ]; then
-              echo "Creating deployment directory..."
-              mkdir -p "$DEPLOY_DIR"
-            fi
+#             # Verify deployment directory
+#             DEPLOY_DIR="/root/projects"
+#             if [ ! -d "$DEPLOY_DIR" ]; then
+#               echo "Creating deployment directory..."
+#               mkdir -p "$DEPLOY_DIR"
+#             fi
             
-            cd "$DEPLOY_DIR"
+#             cd "$DEPLOY_DIR"
             
-            # Create docker-compose.yml file directly on the server
-            echo "Creating docker-compose.yml file..."
-            cat > docker-compose.yml << 'EOL'
-            version: '3.8'
+#             # Pull the latest docker-compose file from your repository
+#             echo "Downloading docker-compose.yml..."
+#             wget -q -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+            
+#             # Create the .env file from secrets
+#             echo "Creating .env file..."
+#             mkdir -p backend
+#             cat > backend/.env << EOL
+#             # Django environment variables
+#             SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+#             DEBUG=${{ secrets.DEBUG }}
+            
+#             # Database settings
+#             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+#             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+#             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+#             POSTGRES_HOST=db
+#             POSTGRES_PORT=5432
+            
+#             # Superuser credentials
+#             DJANGO_SUPERUSER_USERNAME=${{ secrets.DJANGO_SUPERUSER_USERNAME }}
+#             DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+#             DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+#             EOL
+            
+#             # Pull the latest images and restart the containers
+#             echo "Pulling and starting Docker containers..."
+#             docker-compose pull
+#             docker-compose up -d
+            
+#             echo "Deployment completed successfully!"
 
-            services:
-              # Backend service
-              backend:
-                image: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-backend:latest
-                container_name: prompt-manager-backend
-                volumes:
-                  - ./backend/staticfiles:/app/staticfiles
-                  - ./backend/media:/app/media
-                  - ./backend/static:/app/static
-                  - ./backend/templates:/app/templates
-                ports:
-                  - "8000:8000"
-                depends_on:
-                  - db
-                env_file:
-                  - ./backend/.env
-                command: >
-                  sh -c "chmod +x /app/init.sh && 
-                         /app/init.sh"
-                restart: unless-stopped
-                networks:
-                  - prompt-network
-
-              # Database service
-              db:
-                image: postgres:15-alpine
-                container_name: prompt-manager-db
-                volumes:
-                  - postgres_data:/var/lib/postgresql/data/
-                env_file:
-                  - ./backend/.env
-                ports:
-                  - "5432:5432"
-                restart: unless-stopped
-                networks:
-                  - prompt-network
-
-              # Frontend service
-              frontend:
-                image: ${{ secrets.DOCKER_HUB_USERNAME }}/prompt-manager-frontend:latest
-                container_name: prompt-manager-frontend
-                ports:
-                  - "8001:80"
-                depends_on:
-                  - backend
-                environment:
-                  - REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL || 'https://prompt-back.aminseifi.com/api' }}
-                  - REACT_APP_ENVIRONMENT=production
-                restart: unless-stopped
-                networks:
-                  - prompt-network
-
-            volumes:
-              postgres_data:
-
-            networks:
-              prompt-network:
-                driver: bridge
-            EOL
-            
-            # Create the .env file from secrets
-            echo "Creating .env file..."
-            mkdir -p backend
-            cat > backend/.env << EOL
-            # Django environment variables
-            SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
-            DEBUG=${{ secrets.DEBUG }}
-            
-            # Database settings
-            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            POSTGRES_HOST=db
-            POSTGRES_PORT=5432
-            
-            # Superuser credentials
-            DJANGO_SUPERUSER_USERNAME=${{ secrets.DJANGO_SUPERUSER_USERNAME }}
-            DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL }}
-            DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
-            EOL
-            
-            # Pull the latest images and restart the containers
-            echo "Pulling and starting Docker containers..."
-            docker-compose pull
-            docker-compose up -d
-            
-            echo "Deployment completed successfully!"
-
-      # Alternative SSH deployment method (if the other one fails)
-      - name: Manual SSH Deployment
-        if: steps.check_deployment.outputs.can_deploy == 'true' && failure()
-        run: |
-          echo "Attempting alternative SSH deployment due to previous failure..."
+#       # Alternative SSH deployment method (if the other one fails)
+#       - name: Manual SSH Deployment
+#         if: steps.check_deployment.outputs.can_deploy == 'true' && failure()
+#         run: |
+#           echo "Attempting alternative SSH deployment due to previous failure..."
           
-          # Install sshpass if needed for password authentication
-          sudo apt-get update && sudo apt-get install -y sshpass expect
+#           # Install sshpass if needed for password authentication
+#           sudo apt-get update && sudo apt-get install -y sshpass expect
           
-          # Create remotely executed script with env variables passed securely using printf
-          printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create docker-compose.yml file\necho "Creating docker-compose.yml file..."\ncat > docker-compose.yml << EOL\nversion: '"'"'3.8'"'"'\n\nservices:\n  # Backend service\n  backend:\n    image: %s/prompt-manager-backend:latest\n    container_name: prompt-manager-backend\n    volumes:\n      - ./backend/staticfiles:/app/staticfiles\n      - ./backend/media:/app/media\n      - ./backend/static:/app/static\n      - ./backend/templates:/app/templates\n    ports:\n      - "8000:8000"\n    depends_on:\n      - db\n    env_file:\n      - ./backend/.env\n    command: >\n      sh -c "chmod +x /app/init.sh && \n             /app/init.sh"\n    restart: unless-stopped\n    networks:\n      - prompt-network\n\n  # Database service\n  db:\n    image: postgres:15-alpine\n    container_name: prompt-manager-db\n    volumes:\n      - postgres_data:/var/lib/postgresql/data/\n    env_file:\n      - ./backend/.env\n    ports:\n      - "5432:5432"\n    restart: unless-stopped\n    networks:\n      - prompt-network\n\n  # Frontend service\n  frontend:\n    image: %s/prompt-manager-frontend:latest\n    container_name: prompt-manager-frontend\n    ports:\n      - "8001:80"\n    depends_on:\n      - backend\n    environment:\n      - REACT_APP_API_URL=%s\n      - REACT_APP_ENVIRONMENT=production\n    restart: unless-stopped\n    networks:\n      - prompt-network\n\nvolumes:\n  postgres_data:\n\nnetworks:\n  prompt-network:\n    driver: bridge\nEOL\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\nEOL\n\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh "${{ secrets.DOCKER_HUB_USERNAME }}" "${{ secrets.DOCKER_HUB_USERNAME }}" "${{ secrets.REACT_APP_API_URL || 'https://prompt-back.aminseifi.com/api' }}"
+#           # Create remotely executed script with env variables passed securely using printf
+#           printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\nEOL\n\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh
 
-          # Using expect script for SCP with password
-          printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn scp -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh\nexpect "password:"\nsend "$password\\r"\nexpect eof\n\n# Run the script with environment variables\nspawn ssh -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo '"'"'Creating secure env file'"'"' && cat > /root/projects/backend/.env << '"'"'EOL'"'"'\nSECRET_KEY='"'"'$env(SECRET_KEY)'"'"'\nDEBUG='"'"'$env(DEBUG)'"'"'\nPOSTGRES_DB='"'"'$env(POSTGRES_DB)'"'"'\nPOSTGRES_USER='"'"'$env(POSTGRES_USER)'"'"'\nPOSTGRES_PASSWORD='"'"'$env(POSTGRES_PASSWORD)'"'"'\nPOSTGRES_HOST=db\nPOSTGRES_PORT=5432\nDJANGO_SUPERUSER_USERNAME='"'"'$env(DJANGO_SUPERUSER_USERNAME)'"'"'\nDJANGO_SUPERUSER_EMAIL='"'"'$env(DJANGO_SUPERUSER_EMAIL)'"'"'\nDJANGO_SUPERUSER_PASSWORD='"'"'$env(DJANGO_SUPERUSER_PASSWORD)'"'"'\nEOL"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > scp_script.sh
+#           # Using expect script for SCP with password
+#           printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn scp -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh\nexpect "password:"\nsend "$password\\r"\nexpect eof\n\n# Run the script with environment variables\nspawn ssh -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo '"'"'Creating secure env file'"'"' && cat > /root/projects/backend/.env << '"'"'EOL'"'"'\nSECRET_KEY='"'"'$env(SECRET_KEY)'"'"'\nDEBUG='"'"'$env(DEBUG)'"'"'\nPOSTGRES_DB='"'"'$env(POSTGRES_DB)'"'"'\nPOSTGRES_USER='"'"'$env(POSTGRES_USER)'"'"'\nPOSTGRES_PASSWORD='"'"'$env(POSTGRES_PASSWORD)'"'"'\nPOSTGRES_HOST=db\nPOSTGRES_PORT=5432\nDJANGO_SUPERUSER_USERNAME='"'"'$env(DJANGO_SUPERUSER_USERNAME)'"'"'\nDJANGO_SUPERUSER_EMAIL='"'"'$env(DJANGO_SUPERUSER_EMAIL)'"'"'\nDJANGO_SUPERUSER_PASSWORD='"'"'$env(DJANGO_SUPERUSER_PASSWORD)'"'"'\nEOL"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > scp_script.sh
           
-          chmod +x scp_script.sh
-          export SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
-          export DEBUG="${{ secrets.DEBUG }}"
-          export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
-          export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
-          export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
-          export DJANGO_SUPERUSER_USERNAME="${{ secrets.DJANGO_SUPERUSER_USERNAME }}"
-          export DJANGO_SUPERUSER_EMAIL="${{ secrets.DJANGO_SUPERUSER_EMAIL }}"
-          export DJANGO_SUPERUSER_PASSWORD="${{ secrets.DJANGO_SUPERUSER_PASSWORD }}"
-          ./scp_script.sh "${{ secrets.SERVER_PASSWORD }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "Alternative deployment failed, but continuing workflow"
+#           chmod +x scp_script.sh
+#           export SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
+#           export DEBUG="${{ secrets.DEBUG }}"
+#           export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
+#           export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
+#           export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
+#           export DJANGO_SUPERUSER_USERNAME="${{ secrets.DJANGO_SUPERUSER_USERNAME }}"
+#           export DJANGO_SUPERUSER_EMAIL="${{ secrets.DJANGO_SUPERUSER_EMAIL }}"
+#           export DJANGO_SUPERUSER_PASSWORD="${{ secrets.DJANGO_SUPERUSER_PASSWORD }}"
+#           ./scp_script.sh "${{ secrets.SERVER_PASSWORD }}" "${{ secrets.SERVER_HOST }}" "${{ secrets.SERVER_USERNAME }}" || echo "Alternative deployment failed, but continuing workflow"

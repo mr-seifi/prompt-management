@@ -180,7 +180,7 @@ This project is configured with GitHub Actions for continuous integration and de
    - `DOCKER_HUB_TOKEN`: Your Docker Hub access token
    - `SERVER_HOST`: Your deployment server's IP address or hostname
    - `SERVER_USERNAME`: SSH username for your deployment server
-   - `SERVER_SSH_KEY`: Private SSH key for accessing your deployment server
+   - `SERVER_PASSWORD`: Password for accessing your deployment server
    - `DJANGO_SECRET_KEY`: Secret key for your Django application
    - `DEBUG`: Set to "False" for production
    - `POSTGRES_DB`: PostgreSQL database name
@@ -189,6 +189,8 @@ This project is configured with GitHub Actions for continuous integration and de
    - `DJANGO_SUPERUSER_USERNAME`: Admin username
    - `DJANGO_SUPERUSER_EMAIL`: Admin email
    - `DJANGO_SUPERUSER_PASSWORD`: Admin password
+   - `REACT_APP_API_URL`: URL for the frontend to connect to the backend API (optional)
+   - `REACT_APP_ENVIRONMENT`: Environment setting for React app (optional, defaults to 'production')
 
 3. **Prepare your server**:
    
@@ -210,18 +212,19 @@ This project is configured with GitHub Actions for continuous integration and de
 
 4. **Push to the main branch to trigger deployment**:
    
-   The GitHub Actions workflow will:
-   - Run tests
-   - Build Docker images
+   The unified GitHub Actions workflow will sequentially:
+   - Run backend tests
+   - Build the frontend
+   - Build Docker images for both frontend and backend
    - Push images to Docker Hub
-   - Deploy to your server
+   - Deploy everything to your server in one go
 
 ### Manual Deployment
 
 You can also manually trigger the deployment workflow:
 1. Go to your repository on GitHub
 2. Click on "Actions"
-3. Select the "Deploy Prompt Management System" workflow
+3. Select the "Unified Deploy Process" workflow
 4. Click "Run workflow"
 
 ### Local Development vs. Production
