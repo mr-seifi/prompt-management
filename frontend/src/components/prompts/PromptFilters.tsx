@@ -78,7 +78,11 @@ const PromptFilters: React.FC<PromptFiltersProps> = ({
   onFilterChange,
 }) => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFilterChange({ ...filters, search: e.target.value });
+    onFilterChange({ 
+      ...filters, 
+      search: e.target.value,
+      page: 1
+    });
   };
 
   const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -108,6 +112,7 @@ const PromptFilters: React.FC<PromptFiltersProps> = ({
       sortBy: 'updatedAt',
       sortOrder: SortOrder.DESC,
       favorites: false,
+      page: 1,
     });
   };
 
