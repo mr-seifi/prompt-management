@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Prompt } from '../../types';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import { formatDateTimeForDisplay } from '../../services/promptService';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -84,7 +85,7 @@ const PromptCard: React.FC<PromptCardProps> = ({
   onDelete,
   onToggleFavorite,
 }) => {
-  const formattedDate = new Date(prompt.updatedAt).toLocaleDateString();
+  const formattedDate = formatDateTimeForDisplay(prompt.updatedAt);
   
   // Safely extract variables from detectedVariables
   let variables: string[] = [];

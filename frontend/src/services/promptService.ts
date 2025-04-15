@@ -62,20 +62,177 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Helper function to check if a date string is valid
+const isValidDate = (dateString: string | null | undefined): boolean => {
+  if (!dateString) return false;
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+};
+
+// Helper function to format a date string - exportable utility function
+export const formatDate = (dateString: string | null | undefined): string => {
+  if (!isValidDate(dateString)) return 'N/A';
+  
+  try {
+    // Parse the ISO date string into a Date object
+    const date = new Date(dateString as string);
+    
+    // Format as a readable string (e.g., "Jan 15, 2023, 3:27 PM")
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString || 'N/A'; // Return original string if formatting fails
+  }
+};
+
+// Format only the date portion (without time)
+export const formatDateOnly = (dateString: string | null | undefined): string => {
+  if (!isValidDate(dateString)) return 'N/A';
+  
+  try {
+    // Parse the ISO date string into a Date object
+    const date = new Date(dateString as string);
+    
+    // Format as a readable date string (e.g., "Jan 15, 2023")
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString || 'N/A';
+  }
+};
+
+// Format only the time portion
+export const formatTimeOnly = (dateString: string | null | undefined): string => {
+  if (!isValidDate(dateString)) return 'N/A';
+  
+  try {
+    // Parse the ISO date string into a Date object
+    const date = new Date(dateString as string);
+    
+    // Format as a readable time string (e.g., "3:27 PM")
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return 'N/A';
+  }
+};
+
+// Format for displaying "time ago" (e.g., "2 hours ago", "3 days ago")
+export const formatTimeAgo = (dateString: string | null | undefined): string => {
+  if (!isValidDate(dateString)) return 'N/A';
+  
+  try {
+    const date = new Date(dateString as string);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.round(diffMs / 1000);
+    const diffMin = Math.round(diffSec / 60);
+    const diffHour = Math.round(diffMin / 60);
+    const diffDay = Math.round(diffHour / 24);
+    
+    if (diffSec < 60) {
+      return 'just now';
+    } else if (diffMin < 60) {
+      return `${diffMin} ${diffMin === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (diffHour < 24) {
+      return `${diffHour} ${diffHour === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffDay < 30) {
+      return `${diffDay} ${diffDay === 1 ? 'day' : 'days'} ago`;
+    } else {
+      // For older dates, return the formatted date
+      return formatDate(dateString);
+    }
+  } catch (error) {
+    console.error('Error calculating time ago:', error);
+    return dateString || 'N/A';
+  }
+};
+
+// Format date and time for the All Prompts list view
+export const formatDateTimeForDisplay = (dateString: string | null | undefined): string => {
+  if (!isValidDate(dateString)) return 'N/A';
+  
+  try {
+    const date = new Date(dateString as string);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    // Format the time portion
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    
+    // If the date is today, just show "Today at [time]"
+    if (isToday) {
+      return `Today at ${timeStr}`;
+    }
+    
+    // Check if date is yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+      return `Yesterday at ${timeStr}`;
+    }
+    
+    // For older dates, show date and time
+    const dateStr = date.toLocaleDateString('en-US', {
+      month: 'short', 
+      day: 'numeric',
+      year: now.getFullYear() !== date.getFullYear() ? 'numeric' : undefined
+    });
+    
+    return `${dateStr} at ${timeStr}`;
+  } catch (error) {
+    console.error('Error formatting date for display:', error);
+    return dateString || 'N/A';
+  }
+};
+
 // Helper function to transform backend data (description) to frontend format (content)
 const transformPromptFromBackend = (backendPrompt: any): Prompt => {
   // Extract the fields we need from the backend data
   const {
     description,
     favorite,
+    created_at,
+    updated_at,
     ...otherFields
   } = backendPrompt;
+  
+  // Log the date fields for debugging
+  if (environment !== 'production') {
+    console.log('Backend date fields:', { 
+      created_at, 
+      updated_at, 
+      created_at_valid: isValidDate(created_at),
+      updated_at_valid: isValidDate(updated_at)
+    });
+  }
   
   // Create a new prompt object with the correct field mappings
   return {
     ...otherFields,
     content: description, // Map description to content for frontend
     isFavorite: favorite ?? false, // Map favorite to isFavorite with fallback
+    createdAt: created_at || '', // Keep original ISO date string for createdAt
+    updatedAt: updated_at || '', // Keep original ISO date string for updatedAt
   } as Prompt;
 };
 

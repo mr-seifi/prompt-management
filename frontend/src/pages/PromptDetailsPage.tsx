@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import { Prompt } from '../types';
 import promptService from '../services/promptService';
 import usePrompts from '../hooks/usePrompts';
+import { formatDateTimeForDisplay } from '../services/promptService';
 
 const PageContainer = styled.div`
   max-width: 800px;
@@ -191,7 +192,7 @@ const PromptDetailsPage: React.FC = () => {
           
           <PromptMeta>
             <div>
-              Last updated: {new Date(prompt.updatedAt).toLocaleDateString()}
+              Last updated: {formatDateTimeForDisplay(prompt.updatedAt)}
             </div>
             <FavoriteStatus onClick={handleToggleFavorite}>
               <FavoriteIcon isFavorite={prompt.isFavorite}>★</FavoriteIcon>
