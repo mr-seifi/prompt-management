@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,8 +8,14 @@ const PageContainer = styled.div`
   margin: 60px auto;
   padding: ${props => props.theme.spacing.lg};
   background-color: ${props => props.theme.colors.card};
-  border-radius: ${props => props.theme.borderRadius.large};
+  border-radius: calc(${props => props.theme.borderRadius.large} / 2);
   box-shadow: ${props => props.theme.shadows.large};
+  
+  @media (max-width: 768px) {
+    max-width: 90%;
+    margin: 30px auto;
+    padding: ${props => props.theme.spacing.md};
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -40,6 +46,12 @@ const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.xs};
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    align-items: flex-start;
+    gap: 4px;
+  }
 `;
 
 const Label = styled.label`
@@ -49,11 +61,12 @@ const Label = styled.label`
 
 const Input = styled.input`
   padding: ${props => props.theme.spacing.md};
-  border-radius: ${props => props.theme.borderRadius.medium};
+  border-radius: calc(${props => props.theme.borderRadius.medium} / 2);
   border: 1px solid rgba(0, 0, 0, 0.1);
   font-size: 1rem;
   width: 100%;
   box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   
   &:focus {
     outline: none;
@@ -66,6 +79,17 @@ const Input = styled.input`
   &[type="text"] {
     padding-right: 40px;
   }
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.textSecondary};
+    opacity: 0.8;
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: ${props => props.theme.spacing.sm};
+    font-size: 0.95rem;
+  }
 `;
 
 const PasswordRequirements = styled.ul`
@@ -73,13 +97,19 @@ const PasswordRequirements = styled.ul`
   color: ${props => props.theme.colors.textSecondary};
   margin-top: ${props => props.theme.spacing.xs};
   padding-left: 1.2rem;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
 `;
 
 const SubmitButton = styled.button`
   background-color: ${props => props.theme.colors.accent};
   color: white;
   border: none;
-  border-radius: ${props => props.theme.borderRadius.medium};
+  border-radius: calc(${props => props.theme.borderRadius.medium} / 2);
   padding: ${props => props.theme.spacing.md};
   font-size: 1rem;
   font-weight: ${props => props.theme.typography.fontWeights.medium};
@@ -99,15 +129,27 @@ const SubmitButton = styled.button`
     background-color: #cccccc;
     cursor: not-allowed;
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    margin: ${props => props.theme.spacing.md} auto 0;
+    display: block;
+  }
 `;
 
 const ErrorMessage = styled.div`
   color: ${props => props.theme.colors.danger};
   background-color: ${props => props.theme.colors.danger}15;
   padding: ${props => props.theme.spacing.sm};
-  border-radius: ${props => props.theme.borderRadius.small};
+  border-radius: calc(${props => props.theme.borderRadius.small} / 2);
   margin-bottom: ${props => props.theme.spacing.md};
   font-size: 0.9rem;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
 `;
 
 const BottomText = styled.p`
@@ -131,6 +173,10 @@ const PasswordInputContainer = styled.div`
   width: 100%;
   display: flex;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const TogglePasswordButton = styled.button`
@@ -168,7 +214,7 @@ const PasswordSuggestionBox = styled.div`
   width: 100%;
   background-color: ${props => props.theme.colors.card};
   border: 1px solid ${props => props.theme.colors.primary};
-  border-radius: ${props => props.theme.borderRadius.medium};
+  border-radius: calc(${props => props.theme.borderRadius.medium} / 2);
   padding: ${props => props.theme.spacing.md};
   margin-top: 5px;
   box-shadow: ${props => props.theme.shadows.medium};
@@ -200,7 +246,7 @@ const SuggestedPassword = styled.div`
   font-family: monospace;
   padding: ${props => props.theme.spacing.sm};
   background-color: ${props => props.theme.colors.background};
-  border-radius: ${props => props.theme.borderRadius.small};
+  border-radius: calc(${props => props.theme.borderRadius.small} / 2);
   color: ${props => props.theme.colors.primary};
   font-size: 1.1rem;
   margin-bottom: 0;
@@ -425,26 +471,26 @@ const RegisterPage: React.FC = () => {
       
       <Form onSubmit={handleSubmit}>
         <FormGroup>
-          <Label htmlFor="username">Username*</Label>
           <Input
             id="username"
             name="username"
             type="text"
             value={formData.username}
             onChange={handleChange}
+            placeholder="Username"
             required
           />
           {errors.username && <ErrorMessage>{errors.username}</ErrorMessage>}
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="email">Email*</Label>
           <Input
             id="email"
             name="email"
             type="email"
             value={formData.email}
             onChange={handleChange}
+            placeholder="Email"
             required
           />
           {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
@@ -452,26 +498,26 @@ const RegisterPage: React.FC = () => {
         
         <FormRow>
           <FormGroup>
-            <Label htmlFor="firstName">First Name*</Label>
             <Input
               id="firstName"
               name="firstName"
               type="text"
               value={formData.firstName}
               onChange={handleChange}
+              placeholder="First Name"
               required
             />
             {errors.firstName && <ErrorMessage>{errors.firstName}</ErrorMessage>}
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="lastName">Last Name*</Label>
             <Input
               id="lastName"
               name="lastName"
               type="text"
               value={formData.lastName}
               onChange={handleChange}
+              placeholder="Last Name"
               required
             />
             {errors.lastName && <ErrorMessage>{errors.lastName}</ErrorMessage>}
@@ -480,7 +526,6 @@ const RegisterPage: React.FC = () => {
         
         <FormRow>
           <FormGroup>
-            <Label htmlFor="password">Password*</Label>
             <PasswordInputContainer>
               <Input
                 id="password"
@@ -489,6 +534,7 @@ const RegisterPage: React.FC = () => {
                 value={formData.password}
                 onChange={handleChange}
                 onFocus={handlePasswordFocus}
+                placeholder="Password"
                 required
               />
               <TogglePasswordButton 
@@ -547,15 +593,17 @@ const RegisterPage: React.FC = () => {
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="password2">Confirm Password*</Label>
-            <Input
-              id="password2"
-              name="password2"
-              type="password"
-              value={formData.password2}
-              onChange={handleChange}
-              required
-            />
+            <PasswordInputContainer>
+              <Input
+                id="password2"
+                name="password2"
+                type="password"
+                value={formData.password2}
+                onChange={handleChange}
+                placeholder="Confirm Password"
+                required
+              />
+            </PasswordInputContainer>
             {errors.password2 && <ErrorMessage>{errors.password2}</ErrorMessage>}
           </FormGroup>
         </FormRow>
