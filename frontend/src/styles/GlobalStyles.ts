@@ -60,7 +60,7 @@ const GlobalStyles = createGlobalStyle`
     font-family: ${props => props.theme.typography.fontFamilyBody};
     font-size: inherit;
     color: ${props => props.theme.colors.textPrimary};
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: ${props => props.theme.borderRadius.medium};
     padding: 0.75rem;
     background-color: rgba(255, 255, 255, 0.05);

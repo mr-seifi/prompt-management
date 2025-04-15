@@ -29,7 +29,7 @@ const Label = styled.label`
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   font-size: 1rem;
   background-color: rgba(255, 255, 255, 0.05);
@@ -44,7 +44,7 @@ const Input = styled.input`
 
 const Textarea = styled.textarea`
   padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   font-size: 1rem;
   min-height: 150px;
@@ -60,7 +60,7 @@ const Textarea = styled.textarea`
 `;
 
 const VariablePreviewContainer = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   padding: 0.75rem;
   margin-top: 0.5rem;
@@ -142,7 +142,7 @@ const PopupInput = styled.input`
   width: 100%;
   padding: 6px 8px;
   border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   background-color: rgba(255, 255, 255, 0.05);
   color: ${props => props.theme.colors.textPrimary};
   font-size: 0.9rem;
@@ -455,10 +455,10 @@ const PromptForm: React.FC<PromptFormProps> = ({
       ([_, schema]) => Boolean(schema.description)
     );
     
-    // if (!allVariablesHaveDescriptions) {
-    //   alert('Please provide descriptions for all variables by clicking on them in the preview.');
-    //   return;
-    // }
+    if (!allVariablesHaveDescriptions) {
+      alert('Please provide descriptions for all variables by clicking on them in the preview.');
+      return;
+    }
     
     onSubmit(formData);
   };
