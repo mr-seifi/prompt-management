@@ -65,7 +65,7 @@ const Tooltip = styled.div`
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background-color: ${props => props.theme.colors.cardHighlight};
+  background-color: ${props => props.theme.colors.cardHelpHighlight};
   color: ${props => props.theme.colors.textPrimary};
   padding: 0.75rem;
   border-radius: ${props => props.theme.borderRadius.small};
@@ -100,11 +100,13 @@ const Tooltip = styled.div`
 const TooltipTitle = styled.div`
   font-weight: bold;
   margin-bottom: 0.25rem;
+  font-size: 1.2rem;
   color: ${props => props.theme.colors.accent};
 `;
 
 const TooltipContent = styled.div`
-  color: ${props => props.theme.colors.textSecondary};
+  font-style: italic;
+  color: ${props => props.theme.colors.textTertiary};
   font-size: 0.85rem;
 `;
 
@@ -371,7 +373,7 @@ const PromptDetailsPage: React.FC = () => {
               
               <PromptMeta>
                 <div>
-                  Last updated: {formatDateTimeForDisplay(prompt.updatedAt)}
+                  Last updated: {prompt.updatedAt}
                 </div>
                 <FavoriteStatus onClick={handleToggleFavorite}>
                   <FavoriteIcon isFavorite={prompt.isFavorite}>★</FavoriteIcon>

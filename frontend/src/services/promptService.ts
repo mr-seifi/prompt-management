@@ -290,7 +290,14 @@ const promptService = {
   getPrompts: async (filters: PromptFilters = {}): Promise<PaginatedResponse<Prompt>> => {
     const params: Record<string, any> = {};
     
-    if (filters.search) params.search = filters.search;
+    if (filters.search) {
+      params.search = filters.search;
+      // When search parameter is present, don't send page parameter to backend
+      console.log('Search parameter present, not sending page parameter to backend');
+    } else if ('page' in filters && filters.page !== undefined) {
+      // Only add page parameter if search is not present
+      params.page = filters.page;
+    }
     
     // Map camelCase field names to snake_case for ordering
     if (filters.sortBy) {
@@ -308,7 +315,6 @@ const promptService = {
       params.ordering = filters.sortOrder === SortOrder.DESC ? `-${backendField}` : backendField;
     }
     
-    if ('page' in filters && filters.page !== undefined) params.page = filters.page;
     // Add filter for favorites
     if (filters.favorites) params.favorite = true;
     

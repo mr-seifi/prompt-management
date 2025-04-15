@@ -8,6 +8,7 @@ declare module 'styled-components' {
       secondary: string;
       textPrimary: string;
       textSecondary: string;
+      textTertiary: string;
       background: string;
       card: string;
       success: string;
@@ -17,6 +18,8 @@ declare module 'styled-components' {
       accent: string;
       highlight: string;
       cardHighlight: string;
+      cardHelpHighlight: string;
+      neonHighlight: string;
     };
     shadows: {
       small: string;

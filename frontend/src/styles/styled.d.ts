@@ -17,6 +17,7 @@ declare module 'styled-components' {
       accent: string;
       highlight: string;
       cardHighlight: string;
+      cardHelpHighlight: string;
       neonHighlight: string;
     };
     shadows: {

@@ -24,6 +24,7 @@ const theme = {
     // Gradients and accents
     gradient: 'linear-gradient(135deg, #211951 0%, #211951 100%)',
     cardHighlight: 'rgba(33, 25, 81, 0.15)', // Subtle deep purple highlight
+    cardHelpHighlight: 'rgba(59, 55, 81, 0.8)', // Subtle deep purple highlight
     neonHighlight: 'rgba(21, 245, 186, 0.15)',  // Subtle mint highlight
   },
   shadows: {
