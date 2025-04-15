@@ -79,7 +79,7 @@ const ResultContent = styled.div`
 `;
 
 const CopyButton = styled(Button)`
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 1.5rem;
   font-size: 0.875rem;
 `;
 
@@ -184,7 +184,10 @@ const PromptRenderer: React.FC<PromptRendererProps> = ({ promptId }) => {
           <ResultHeader>
             <ResultTitle>Rendered Result</ResultTitle>
             <CopyButton type="button" variant="primary" onClick={copyToClipboard}>
-              Copy to Clipboard
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style={{ marginRight: '4px' }}>
+                <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" />
+              </svg>
+              Copy
             </CopyButton>
           </ResultHeader>
           <ResultContent>{renderedContent}</ResultContent>

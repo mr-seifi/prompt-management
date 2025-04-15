@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import PromptForm from '../components/prompts/PromptForm';
 import { PromptFormData, Prompt } from '../types';
@@ -11,12 +11,33 @@ const PageContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: ${props => props.theme.spacing.lg};
+  position: relative;
 `;
 
 const PageTitle = styled.h1`
   font-size: 2rem;
   margin-bottom: 1.5rem;
   color: ${props => props.theme.colors.textPrimary};
+`;
+
+const CancelButton = styled(Link)`
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: ${props => props.theme.colors.cardHighlight};
+  color: ${props => props.theme.colors.textSecondary};
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.danger}30;
+    color: ${props => props.theme.colors.danger};
+  }
 `;
 
 const LoadingMessage = styled.div`
@@ -96,6 +117,11 @@ const EditPromptPage: React.FC = () => {
   return (
     <PageContainer>
       <PageTitle>Edit Prompt</PageTitle>
+      <CancelButton to={`/prompts/${id}`}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+        </svg>
+      </CancelButton>
       
       {error && <ErrorMessage>{error}</ErrorMessage>}
       
