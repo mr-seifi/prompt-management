@@ -28,12 +28,14 @@ services:
     image: postgres:15-alpine
     container_name: prompt-manager-db
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - prompt_manager_postgres_data:/var/lib/postgresql/data
     env_file:
       - ./backend/.env
     ports:
       - "5432:5432"
     restart: unless-stopped
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
     networks:
       - prompt-network
 
@@ -55,7 +57,11 @@ services:
       - prompt-network
 
 volumes:
-  postgres_data:
+  # Use a named volume with explicit configuration for persistence
+  prompt_manager_postgres_data:
+    name: prompt_manager_postgres_data
+    driver: local
+    # Ensure the external option is NOT set to true to prevent data loss during redeployment
 
 networks:
   prompt-network:

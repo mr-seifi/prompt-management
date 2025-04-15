@@ -188,7 +188,7 @@ jobs:
             
             # Pull the latest docker-compose file from your repository
             echo "Downloading docker-compose.yml..."
-            wget -q -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+            wget -q -O docker-compose.yml.new https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
             
             # Create the .env file from secrets
             echo "Creating .env file..."
@@ -222,6 +222,15 @@ jobs:
             REACT_APP_USE_MOCK_DATA=false
             EOL
             
+            # Safely stop the containers without removing volumes
+            if [ -f "docker-compose.yml" ]; then
+              echo "Stopping containers safely (preserving volumes)..."
+              docker-compose down --remove-orphans
+            fi
+            
+            # Replace with new docker-compose.yml
+            mv docker-compose.yml.new docker-compose.yml
+            
             # Pull the latest images and restart the containers
             echo "Pulling and starting Docker containers..."
             docker-compose pull
@@ -239,7 +248,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y sshpass expect
           
           # Create remotely executed script with env variables passed securely using printf
-          printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh
+          printf '#!/bin/bash\nset -e\n\necho "SSH connection successful!"\n\n# Verify deployment directory\nDEPLOY_DIR="/root/projects"\nif [ ! -d "$DEPLOY_DIR" ]; then\n  echo "Creating deployment directory..."\n  mkdir -p "$DEPLOY_DIR"\nfi\n\ncd "$DEPLOY_DIR"\n\n# Create the .env file - values will be sent securely via SSH\necho "Creating .env file..."\nmkdir -p backend\ncat > backend/.env << EOL\n# Variables will be populated by secure environment transfer\n\n# Safely stop the containers without removing volumes\nif [ -f "docker-compose.yml" ]; then\n  echo "Stopping containers safely (preserving volumes)..."\n  docker-compose down --remove-orphans\nfi\n\necho "Pulling and starting Docker containers..."\ndocker-compose pull\ndocker-compose up -d\n\necho "Deployment completed successfully!"\n' > deploy.sh
 
           # Using expect script for SCP with password
           printf '#!/usr/bin/expect -f\nset timeout 30\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn scp -o StrictHostKeyChecking=no deploy.sh $user@$host:~/deploy.sh\nexpect "password:"\nsend "$password\\r"\nexpect eof\n\n# Run the script with environment variables\nspawn ssh -o StrictHostKeyChecking=no $user@$host "chmod +x ~/deploy.sh && ~/deploy.sh && echo '"'"'Creating secure env file'"'"' && cat > /root/projects/backend/.env << '"'"'EOL'"'"'\nSECRET_KEY='"'"'$env(SECRET_KEY)'"'"'\nDEBUG='"'"'$env(DEBUG)'"'"'\nPOSTGRES_DB='"'"'$env(POSTGRES_DB)'"'"'\nPOSTGRES_USER='"'"'$env(POSTGRES_USER)'"'"'\nPOSTGRES_PASSWORD='"'"'$env(POSTGRES_PASSWORD)'"'"'\nPOSTGRES_HOST=db\nPOSTGRES_PORT=5432\nDJANGO_SUPERUSER_USERNAME='"'"'$env(DJANGO_SUPERUSER_USERNAME)'"'"'\nDJANGO_SUPERUSER_EMAIL='"'"'$env(DJANGO_SUPERUSER_EMAIL)'"'"'\nDJANGO_SUPERUSER_PASSWORD='"'"'$env(DJANGO_SUPERUSER_PASSWORD)'"'"'\nEOL"\nexpect "password:"\nsend "$password\\r"\nexpect eof\n' > scp_script.sh
