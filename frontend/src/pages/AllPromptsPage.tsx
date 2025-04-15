@@ -101,7 +101,7 @@ const AllPromptsPage: React.FC = () => {
     <PageContainer>
       <HeaderContainer>
         <PageTitle>All Prompts</PageTitle>
-        <Button as={Link} to="/prompts/new">
+        <Button as={Link} variant="primary" to="/prompts/new">
           Create New Prompt
         </Button>
       </HeaderContainer>

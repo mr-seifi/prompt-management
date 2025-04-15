@@ -31,7 +31,7 @@ const Label = styled.label`
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   font-size: 1rem;
   background-color: rgba(255, 255, 255, 0.05);
