@@ -23,7 +23,7 @@ const FormGroup = styled.div`
 `;
 
 const Label = styled.label`
-  font-weight: 500;
+  font-weight: 700;
   color: ${props => props.theme.colors.textPrimary};
 `;
 
