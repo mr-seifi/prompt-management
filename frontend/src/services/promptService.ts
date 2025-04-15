@@ -62,6 +62,40 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Helper function to transform backend data (description) to frontend format (content)
+const transformPromptFromBackend = (backendPrompt: any): Prompt => {
+  // Extract the fields we need from the backend data
+  const {
+    description,
+    favorite,
+    ...otherFields
+  } = backendPrompt;
+  
+  // Create a new prompt object with the correct field mappings
+  return {
+    ...otherFields,
+    content: description, // Map description to content for frontend
+    isFavorite: favorite ?? false, // Map favorite to isFavorite with fallback
+  } as Prompt;
+};
+
+// Helper function to transform frontend data (content) to backend format (description)
+const transformPromptToBackend = (frontendData: PromptFormData): any => {
+  // Extract the fields we need from the frontend data
+  const {
+    content,
+    isFavorite,
+    ...otherFields
+  } = frontendData;
+  
+  // Create a new data object with the correct field mappings
+  return {
+    ...otherFields,
+    description: content, // Map content to description for the backend
+    favorite: isFavorite, // Map isFavorite to favorite for backend
+  };
+};
+
 // Prompt service for interacting with the API
 const promptService = {
   // Get all prompts with optional filtering
@@ -69,20 +103,47 @@ const promptService = {
     const params: Record<string, any> = {};
     
     if (filters.search) params.search = filters.search;
-    if (filters.sortBy) params.ordering = filters.sortOrder === SortOrder.DESC ? `-${filters.sortBy}` : filters.sortBy;
-    if ('page' in filters && filters.page !== undefined) params.page = filters.page;
     
-    const response = await axiosInstance.get<PaginatedResponse<Prompt>>(PROMPTS_URL, { params });
-    return response.data;
+    // Map camelCase field names to snake_case for ordering
+    if (filters.sortBy) {
+      // Convert camelCase to snake_case for backend field names
+      const backendFieldMapping: Record<string, string> = {
+        'updatedAt': 'updated_at',
+        'createdAt': 'created_at',
+        'isFavorite': 'favorite'
+      };
+      
+      // Use the mapped field name if available, otherwise use the original
+      const backendField = backendFieldMapping[filters.sortBy] || filters.sortBy;
+      params.ordering = filters.sortOrder === SortOrder.DESC ? `-${backendField}` : backendField;
+    }
+    
+    if ('page' in filters && filters.page !== undefined) params.page = filters.page;
+    // Add filter for favorites
+    if (filters.favorites) params.favorite = true;
+    
+    console.log('API Request params:', params);
+    
+    const response = await axiosInstance.get<PaginatedResponse<any>>(PROMPTS_URL, { params });
+    
+    // Transform each prompt from backend format to frontend format
+    const transformedResponse: PaginatedResponse<Prompt> = {
+      ...response.data,
+      results: response.data.results.map(transformPromptFromBackend)
+    };
+    
+    return transformedResponse;
   },
   
   // Get a single prompt by ID
   getPrompt: async (id: string): Promise<Prompt | null> => {
     try {
       console.log(`API request: Getting prompt ${id}`);
-      const response = await axiosInstance.get<Prompt>(`${PROMPTS_URL}${id}/`);
+      const response = await axiosInstance.get<any>(`${PROMPTS_URL}${id}/`);
       console.log(`API response: Prompt ${id} found`, response.data);
-      return response.data;
+      
+      // Transform from backend format to frontend format
+      return transformPromptFromBackend(response.data);
     } catch (error: any) {
       // If it's a 404 error, return null instead of throwing
       if (error.response && error.response.status === 404) {
@@ -109,14 +170,18 @@ const promptService = {
         throw new Error('Title and content are required.');
       }
       
-      const response = await axiosInstance.post<Prompt>(PROMPTS_URL, promptData);
+      // Transform from frontend format to backend format
+      const apiData = transformPromptToBackend(promptData);
+      
+      const response = await axiosInstance.post<any>(PROMPTS_URL, apiData);
       
       console.log('Prompt created successfully, API response:', {
         status: response.status,
         data: response.data
       });
       
-      return response.data;
+      // Transform from backend format to frontend format for the return value
+      return transformPromptFromBackend(response.data);
     } catch (error: any) {
       console.error('Error creating prompt:', error);
       
@@ -145,10 +210,15 @@ const promptService = {
         data: promptData
       });
       
-      const response = await axiosInstance.patch<Prompt>(`${PROMPTS_URL}${id}/`, promptData);
+      // Transform from frontend format to backend format
+      const apiData = transformPromptToBackend(promptData as PromptFormData);
+      
+      const response = await axiosInstance.patch<any>(`${PROMPTS_URL}${id}/`, apiData);
       
       console.log(`Prompt ${id} updated successfully:`, response.data);
-      return response.data;
+      
+      // Transform from backend format to frontend format for the return value
+      return transformPromptFromBackend(response.data);
     } catch (error: any) {
       console.error(`Error updating prompt ${id}:`, error);
       
@@ -191,9 +261,11 @@ const promptService = {
   toggleFavorite: async (id: string): Promise<Prompt> => {
     try {
       console.log(`PATCH request to toggle favorite for prompt ${id}`);
-      const response = await axiosInstance.patch<Prompt>(`${PROMPTS_URL}${id}/toggle_favorite/`, {});
+      const response = await axiosInstance.patch<any>(`${PROMPTS_URL}${id}/toggle_favorite/`, {});
       console.log(`Favorite status toggled for prompt ${id}:`, response.data);
-      return response.data;
+      
+      // Transform from backend format to frontend format
+      return transformPromptFromBackend(response.data);
     } catch (error: any) {
       console.error(`Error toggling favorite for prompt ${id}:`, error);
       

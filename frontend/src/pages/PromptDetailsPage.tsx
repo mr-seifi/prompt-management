@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Prompt } from '../types';
-import { promptsApi } from '../services/api';
+import promptService from '../services/promptService';
 import usePrompts from '../hooks/usePrompts';
 
 const PageContainer = styled.div`
@@ -112,7 +112,7 @@ const PromptDetailsPage: React.FC = () => {
       setError(null);
       
       try {
-        const data = await promptsApi.getPrompt(id);
+        const data = await promptService.getPrompt(id);
         setPrompt(data);
       } catch (err) {
         setError('Failed to load prompt. Please try again.');

@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PromptForm from '../components/prompts/PromptForm';
 import { PromptFormData, Prompt } from '../types';
-import { promptsApi } from '../services/api';
+import promptsService from '../services/promptService';
 import usePrompts from '../hooks/usePrompts';
+import promptService from '../services/promptService';
 
 const PageContainer = styled.div`
   max-width: 800px;
@@ -50,7 +51,7 @@ const EditPromptPage: React.FC = () => {
       setError(null);
       
       try {
-        const data = await promptsApi.getPrompt(id);
+        const data = await promptService.getPrompt(id);
         setPrompt(data);
       } catch (err) {
         setError('Failed to load prompt. Please try again.');

@@ -2,6 +2,7 @@ export interface Prompt {
   id: string;
   title: string;
   content: string;
+  description?: string;
   tags: string[];
   isFavorite: boolean;
   createdAt: string;
