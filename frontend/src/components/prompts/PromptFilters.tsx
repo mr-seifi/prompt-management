@@ -152,7 +152,7 @@ const PromptFilters: React.FC<PromptFiltersProps> = ({
       </Checkbox>
 
       <Button 
-        variant="secondary" 
+        variant="primary" 
         size="small" 
         onClick={handleResetFilters}
       >

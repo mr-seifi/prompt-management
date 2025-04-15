@@ -12,6 +12,7 @@ const theme = {
     // Text colors
     textPrimary: '#211951',  // Deep purple for headings on light backgrounds
     textSecondary: '#555555', // Medium gray for body text
+    textTertiary: '#ffffff', // White for body text
     
     // UI colors
     background: '#F0F3FF',   // Very light blue background

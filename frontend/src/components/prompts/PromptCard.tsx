@@ -25,6 +25,15 @@ const PromptTitle = styled.div`
   gap: ${props => props.theme.spacing.sm};
 `;
 
+const TitleLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const FavoriteIcon = styled.span<{ favorite: boolean }>`
   color: ${({ favorite, theme }) => (favorite ? theme.colors.warning : '#ccc')};
   cursor: pointer;
@@ -85,7 +94,7 @@ const PromptCard: React.FC<PromptCardProps> = ({
   onDelete,
   onToggleFavorite,
 }) => {
-  const formattedDate = formatDateTimeForDisplay(prompt.updatedAt);
+  const formattedDate = prompt.updatedAt;
   
   // Safely extract variables from detectedVariables
   let variables: string[] = [];
@@ -110,7 +119,9 @@ const PromptCard: React.FC<PromptCardProps> = ({
           >
             ★
           </FavoriteIcon>
-          <h3>{prompt.title}</h3>
+          <TitleLink to={`/prompts/${prompt.id}`}>
+            <h3>{prompt.title}</h3>
+          </TitleLink>
         </PromptTitle>
         
         <PromptContent>{prompt.content}</PromptContent>
@@ -133,11 +144,8 @@ const PromptCard: React.FC<PromptCardProps> = ({
         >
           Delete
         </Button>
-        <Button variant="secondary" size="small" as={Link} to={`/prompts/${prompt.id}/edit`}>
+        <Button variant="primary" size="small" as={Link} to={`/prompts/${prompt.id}/edit`}>
           Edit
-        </Button>
-        <Button variant="primary" size="small" as={Link} to={`/prompts/${prompt.id}`}>
-          View
         </Button>
       </CardActions>
     </StyledCard>

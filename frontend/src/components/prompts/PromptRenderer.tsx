@@ -183,7 +183,7 @@ const PromptRenderer: React.FC<PromptRendererProps> = ({ promptId }) => {
         <ResultContainer>
           <ResultHeader>
             <ResultTitle>Rendered Result</ResultTitle>
-            <CopyButton type="button" variant="secondary" onClick={copyToClipboard}>
+            <CopyButton type="button" variant="primary" onClick={copyToClipboard}>
               Copy to Clipboard
             </CopyButton>
           </ResultHeader>
