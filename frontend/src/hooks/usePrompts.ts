@@ -31,34 +31,6 @@ const usePrompts = (initialFilters: PromptFilters = {}) => {
       setIsLoading(false);
     }
   }, [filters]);
-  
-  // Get the current page of results and adjusted count for client-side pagination
-  const getClientSidePaginationData = useCallback(() => {
-    const page = filters.page || 1;
-    const pageSize = 12; // Match backend page size
-    
-    // If there's no search, just return server-side pagination data
-    if (!filters.search) {
-      return {
-        results: promptsData.results,
-        count: promptsData.count
-      };
-    }
-
-    // For search results, we do client-side pagination
-    const allResults = promptsData.results;
-    const totalCount = allResults.length;
-    
-    // When search is active, we do client-side pagination by slicing the results
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = Math.min(startIndex + pageSize, totalCount);
-    const paginatedResults = allResults.slice(startIndex, endIndex);
-
-    return {
-      results: paginatedResults,
-      count: totalCount
-    };
-  }, [filters.page, filters.search, promptsData.results]);
 
   // Apply filter changes
   const applyFilters = useCallback((newFilters: PromptFilters) => {
@@ -154,14 +126,11 @@ const usePrompts = (initialFilters: PromptFilters = {}) => {
     fetchPrompts();
   }, [fetchPrompts]);
 
-  // Get pagination data
-  const paginationData = getClientSidePaginationData();
-
   return {
-    prompts: paginationData.results,
-    totalCount: paginationData.count,
-    hasNextPage: paginationData.count > (filters.page || 1) * 12,
-    hasPreviousPage: (filters.page || 1) > 1,
+    prompts: promptsData.results,
+    totalCount: promptsData.count,
+    hasNextPage: !!promptsData.next,
+    hasPreviousPage: !!promptsData.previous,
     isLoading,
     error,
     applyFilters,

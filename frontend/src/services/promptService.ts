@@ -205,84 +205,53 @@ export const formatDateTimeForDisplay = (dateString: string | null | undefined):
   }
 };
 
-/**
- * Transforms backend prompt data structure to frontend format.
- * Maps the backend 'description' field to the frontend 'content' field.
- * 
- * @param backendData The prompt data from the backend API
- * @returns Transformed prompt data matching the frontend Prompt interface
- */
-function transformPromptFromBackend(backendData: any): Prompt {
-  try {
-    console.log('Transforming prompt from backend format:', backendData);
-    
-    if (!backendData) {
-      throw new Error('Backend data is null or undefined');
-    }
-    
-    // Check if description field exists
-    if (!('description' in backendData)) {
-      console.warn('Backend data missing description field:', backendData);
-    }
-    
-    // Map description to content, ensuring it exists
-    const content = backendData.description || '';
-    
-    // Map backend format to frontend format
-    const frontendData: Prompt = {
-      id: backendData.id,
-      title: backendData.title || '',
-      content: content, // Map description to content
-      description: content, // Also keep description for backward compatibility
-      detectedVariables: backendData.detected_variables || [],
-      variablesSchema: backendData.variables_schema || {},
-      isFavorite: backendData.favorite || false,
-      createdAt: backendData.created_at || '', // Store original date string
-      updatedAt: formatDateTimeForDisplay(backendData.updated_at),
-      tags: [] // The backend doesn't have tags yet, but our frontend interface expects them
-    };
-    
-    console.log('Transformed frontend data:', frontendData);
-    return frontendData;
-  } catch (error) {
-    console.error('Error transforming prompt from backend:', error);
-    throw new Error('Failed to transform prompt data from backend format');
+// Helper function to transform backend data (description) to frontend format (content)
+const transformPromptFromBackend = (backendPrompt: any): Prompt => {
+  // Extract the fields we need from the backend data
+  const {
+    description,
+    favorite,
+    created_at,
+    updated_at,
+    ...otherFields
+  } = backendPrompt;
+  
+  // Log the date fields for debugging
+  if (environment !== 'production') {
+    console.log('Backend date fields:', { 
+      created_at, 
+      updated_at, 
+      created_at_valid: isValidDate(created_at),
+      updated_at_valid: isValidDate(updated_at)
+    });
   }
-}
+  
+  // Create a new prompt object with the correct field mappings
+  return {
+    ...otherFields,
+    content: description, // Map description to content for frontend
+    isFavorite: favorite ?? false, // Map favorite to isFavorite with fallback
+    createdAt: created_at || '', // Keep original ISO date string for createdAt
+    updatedAt: updated_at || '', // Keep original ISO date string for updatedAt
+  } as Prompt;
+};
 
-/**
- * Transforms frontend prompt data structure to backend format.
- * Maps the frontend 'content' field to the backend 'description' field.
- * 
- * @param frontendData The prompt data from the frontend form
- * @returns Transformed prompt data ready for the backend API
- */
-function transformPromptToBackend(frontendData: PromptFormData): any {
-  try {
-    console.log('Transforming prompt to backend format:', frontendData);
-    
-    if (!frontendData) {
-      throw new Error('Frontend data is null or undefined');
-    }
-    
-    // Map content to description, ensuring it exists
-    const description = frontendData.content || '';
-    
-    // Map frontend format to backend format
-    const backendData = {
-      title: frontendData.title || '',
-      description: description, // Map content to description
-      variables_schema: frontendData.variablesSchema || {},
-      favorite: frontendData.isFavorite || false
-    };
-    
-    console.log('Transformed backend data:', backendData);
-    return backendData;
-  } catch (error) {
-    console.error('Error transforming prompt to backend:', error);
-    throw new Error('Failed to transform prompt data to backend format');
-  }
-}
+// Helper function to transform frontend data (content) to backend format (description)
+const transformPromptToBackend = (frontendData: PromptFormData): any => {
+  // Extract the fields we need from the frontend data
+  const {
+    content,
+    isFavorite,
+    ...otherFields
+  } = frontendData;
+  
+  // Create a new data object with the correct field mappings
+  return {
+    ...otherFields,
+    description: content, // Map content to description for the backend
+    favorite: isFavorite, // Map isFavorite to favorite for backend
+  };
+};
 
 // Prompt service for interacting with the API
 const promptService = {
@@ -290,24 +259,15 @@ const promptService = {
   getPrompts: async (filters: PromptFilters = {}): Promise<PaginatedResponse<Prompt>> => {
     const params: Record<string, any> = {};
     
-    if (filters.search) {
-      params.search = filters.search;
-      // When search parameter is present, don't send page parameter to backend
-      console.log('Search parameter present, not sending page parameter to backend');
-    } else if ('page' in filters && filters.page !== undefined) {
-      // Only add page parameter if search is not present
-      params.page = filters.page;
-    }
+    if (filters.search) params.search = filters.search;
     
     // Map camelCase field names to snake_case for ordering
     if (filters.sortBy) {
       // Convert camelCase to snake_case for backend field names
-      // Important: 'content' in frontend maps to 'description' in backend
       const backendFieldMapping: Record<string, string> = {
         'updatedAt': 'updated_at',
         'createdAt': 'created_at',
-        'isFavorite': 'favorite',
-        'content': 'description' // Map frontend 'content' to backend 'description' for sorting
+        'isFavorite': 'favorite'
       };
       
       // Use the mapped field name if available, otherwise use the original
@@ -315,6 +275,7 @@ const promptService = {
       params.ordering = filters.sortOrder === SortOrder.DESC ? `-${backendField}` : backendField;
     }
     
+    if ('page' in filters && filters.page !== undefined) params.page = filters.page;
     // Add filter for favorites
     if (filters.favorites) params.favorite = true;
     
@@ -362,23 +323,12 @@ const promptService = {
       });
       
       // Validate promptData before sending to API
-      if (!promptData.title) {
-        throw new Error('Title is required for prompt creation.');
-      }
-      
-      // Validate content field (maps to description in backend)
-      if (!promptData.content) {
-        throw new Error('Content is required for prompt creation. This will be sent as the description field to the backend.');
+      if (!promptData.title || !promptData.content) {
+        throw new Error('Title and content are required.');
       }
       
       // Transform from frontend format to backend format
       const apiData = transformPromptToBackend(promptData);
-      
-      // Additional logging for the mapping
-      console.log('Content to description mapping:', {
-        frontendContent: promptData.content,
-        backendDescription: apiData.description
-      });
       
       const response = await axiosInstance.post<any>(PROMPTS_URL, apiData);
       
@@ -417,21 +367,8 @@ const promptService = {
         data: promptData
       });
       
-      // Validate content field if present (maps to description in backend)
-      if (promptData.content === '') {
-        throw new Error('Content cannot be empty when updating a prompt.');
-      }
-      
       // Transform from frontend format to backend format
       const apiData = transformPromptToBackend(promptData as PromptFormData);
-      
-      // Log the content to description mapping if content field is present
-      if ('content' in promptData) {
-        console.log('Content to description mapping:', {
-          frontendContent: promptData.content,
-          backendDescription: apiData.description
-        });
-      }
       
       const response = await axiosInstance.patch<any>(`${PROMPTS_URL}${id}/`, apiData);
       
@@ -526,9 +463,10 @@ const promptService = {
     try {
       console.log(`POST request to render prompt ${id}:`, data);
       
-      // Prepare the data with the correct field mapping
+      // Rename key to match the API's expected format if needed
       const requestData = {
-        variable_values: data.variable_values
+        // Backend might expect variables_values instead of variable_values
+        variables_values: data.variable_values
       };
       
       const response = await axiosInstance.post<PromptRenderResponse>(`${PROMPTS_URL}${id}/render/`, requestData);

@@ -1,0 +1,692 @@
+{
+  "test_name": "api_test_1744723106",
+  "start_time": "2025-04-15T13:18:26.515004",
+  "end_time": "2025-04-15T13:18:26.682349",
+  "total_duration": 0.1673440933227539,
+  "request_results": {
+    "api/prompts/": [
+      {
+        "status_code": 201,
+        "elapsed_time": 0.01792621612548828,
+        "response_size": 249,
+        "timestamp": "2025-04-15T13:18:26.584896",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "249",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 201,
+        "elapsed_time": 0.007246971130371094,
+        "response_size": 249,
+        "timestamp": "2025-04-15T13:18:26.602842",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "249",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.030126094818115234,
+        "response_size": 4323,
+        "timestamp": "2025-04-15T13:18:26.584799",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "4323",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 201,
+        "elapsed_time": 0.0101318359375,
+        "response_size": 249,
+        "timestamp": "2025-04-15T13:18:26.617178",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "249",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.02805185317993164,
+        "response_size": 4332,
+        "timestamp": "2025-04-15T13:18:26.601478",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "4332",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 201,
+        "elapsed_time": 0.008895158767700195,
+        "response_size": 249,
+        "timestamp": "2025-04-15T13:18:26.635285",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "249",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.029488325119018555,
+        "response_size": 4350,
+        "timestamp": "2025-04-15T13:18:26.616564",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "4350",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.024644136428833008,
+        "response_size": 4349,
+        "timestamp": "2025-04-15T13:18:26.632523",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "4349",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 201,
+        "elapsed_time": 0.011034011840820312,
+        "response_size": 249,
+        "timestamp": "2025-04-15T13:18:26.655641",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "249",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.029645919799804688,
+        "response_size": 4359,
+        "timestamp": "2025-04-15T13:18:26.652502",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, POST, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "4359",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      }
+    ],
+    "api/prompts/229467/": [
+      {
+        "status_code": 200,
+        "elapsed_time": 0.014203310012817383,
+        "response_size": 373,
+        "timestamp": "2025-04-15T13:18:26.585107",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "373",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.008296966552734375,
+        "response_size": 372,
+        "timestamp": "2025-04-15T13:18:26.608244",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "372",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.01164388656616211,
+        "response_size": 373,
+        "timestamp": "2025-04-15T13:18:26.620858",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "373",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.018612146377563477,
+        "response_size": 373,
+        "timestamp": "2025-04-15T13:18:26.637541",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "373",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.012141227722167969,
+        "response_size": 373,
+        "timestamp": "2025-04-15T13:18:26.656173",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "373",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      }
+    ],
+    "api/prompts/229467/toggle_favorite/": [
+      {
+        "status_code": 200,
+        "elapsed_time": 0.023672103881835938,
+        "response_size": 372,
+        "timestamp": "2025-04-15T13:18:26.585756",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "PATCH, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "372",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.011387825012207031,
+        "response_size": 373,
+        "timestamp": "2025-04-15T13:18:26.609450",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "PATCH, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "373",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.009544849395751953,
+        "response_size": 372,
+        "timestamp": "2025-04-15T13:18:26.625715",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "PATCH, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "372",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.012012004852294922,
+        "response_size": 373,
+        "timestamp": "2025-04-15T13:18:26.640461",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "PATCH, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "373",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.019266128540039062,
+        "response_size": 372,
+        "timestamp": "2025-04-15T13:18:26.656760",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "PATCH, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "372",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      }
+    ],
+    "api/prompts/229467/variables/": [
+      {
+        "status_code": 200,
+        "elapsed_time": 0.014738082885742188,
+        "response_size": 120,
+        "timestamp": "2025-04-15T13:18:26.586715",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "120",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.007025241851806641,
+        "response_size": 120,
+        "timestamp": "2025-04-15T13:18:26.610133",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "120",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.010182857513427734,
+        "response_size": 120,
+        "timestamp": "2025-04-15T13:18:26.627339",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "120",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.012530803680419922,
+        "response_size": 120,
+        "timestamp": "2025-04-15T13:18:26.644201",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "120",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.008585214614868164,
+        "response_size": 120,
+        "timestamp": "2025-04-15T13:18:26.657192",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "120",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      }
+    ],
+    "api/prompts/229467/render/": [
+      {
+        "status_code": 200,
+        "elapsed_time": 0.008874893188476562,
+        "response_size": 281,
+        "timestamp": "2025-04-15T13:18:26.599344",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "POST, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "281",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.010736942291259766,
+        "response_size": 281,
+        "timestamp": "2025-04-15T13:18:26.614956",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "POST, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "281",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.010879993438720703,
+        "response_size": 281,
+        "timestamp": "2025-04-15T13:18:26.629550",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "POST, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "281",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.009531259536743164,
+        "response_size": 281,
+        "timestamp": "2025-04-15T13:18:26.646075",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "POST, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "281",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      {
+        "status_code": 200,
+        "elapsed_time": 0.014985799789428711,
+        "response_size": 281,
+        "timestamp": "2025-04-15T13:18:26.665819",
+        "success": true,
+        "error": null,
+        "response_headers": {
+          "Date": "Tue, 15 Apr 2025 13:18:26 GMT",
+          "Server": "WSGIServer/0.2 CPython/3.12.5",
+          "Content-Type": "application/json",
+          "Vary": "Accept, origin, Cookie",
+          "Allow": "POST, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Length": "281",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "same-origin",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      }
+    ]
+  },
+  "iterations": 5,
+  "concurrent": true,
+  "summary": {
+    "api/prompts/": {
+      "min_time": 0.007246971130371094,
+      "max_time": 0.030126094818115234,
+      "mean_time": 0.0197190523147583,
+      "median_time": 0.021285176277160645,
+      "p95_time": null,
+      "p99_time": null,
+      "std_dev": 0.009656594377439763,
+      "total_requests": 10,
+      "successful_requests": 10,
+      "failed_requests": 0,
+      "success_rate": 1.0,
+      "avg_response_size": 2295.8
+    },
+    "api/prompts/229467/": {
+      "min_time": 0.008296966552734375,
+      "max_time": 0.018612146377563477,
+      "mean_time": 0.012979507446289062,
+      "median_time": 0.012141227722167969,
+      "p95_time": null,
+      "p99_time": null,
+      "std_dev": 0.0037959550610836084,
+      "total_requests": 5,
+      "successful_requests": 5,
+      "failed_requests": 0,
+      "success_rate": 1.0,
+      "avg_response_size": 372.8
+    },
+    "api/prompts/229467/toggle_favorite/": {
+      "min_time": 0.009544849395751953,
+      "max_time": 0.023672103881835938,
+      "mean_time": 0.01517658233642578,
+      "median_time": 0.012012004852294922,
+      "p95_time": null,
+      "p99_time": null,
+      "std_dev": 0.006020463501882058,
+      "total_requests": 5,
+      "successful_requests": 5,
+      "failed_requests": 0,
+      "success_rate": 1.0,
+      "avg_response_size": 372.4
+    },
+    "api/prompts/229467/variables/": {
+      "min_time": 0.007025241851806641,
+      "max_time": 0.014738082885742188,
+      "mean_time": 0.01061244010925293,
+      "median_time": 0.010182857513427734,
+      "p95_time": null,
+      "p99_time": null,
+      "std_dev": 0.00307665495548021,
+      "total_requests": 5,
+      "successful_requests": 5,
+      "failed_requests": 0,
+      "success_rate": 1.0,
+      "avg_response_size": 120
+    },
+    "api/prompts/229467/render/": {
+      "min_time": 0.008874893188476562,
+      "max_time": 0.014985799789428711,
+      "mean_time": 0.011001777648925782,
+      "median_time": 0.010736942291259766,
+      "p95_time": null,
+      "p99_time": null,
+      "std_dev": 0.002379257373788111,
+      "total_requests": 5,
+      "successful_requests": 5,
+      "failed_requests": 0,
+      "success_rate": 1.0,
+      "avg_response_size": 281
+    }
+  }
+}

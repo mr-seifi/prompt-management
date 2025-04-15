@@ -53,12 +53,16 @@ INSTALLED_APPS = [
     
     # Third-party apps
     "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "django_filters",
     "corsheaders",
     "drf_yasg",
     
     # Local apps
-    "prompts",
-    "users",
+    "prompts.apps.PromptsConfig",
+    "users.apps.UsersConfig",
+    "api_performance",  # New API performance testing package
 ]
 
 MIDDLEWARE = [

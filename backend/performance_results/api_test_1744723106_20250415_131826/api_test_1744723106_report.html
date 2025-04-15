@@ -1,0 +1,225 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>API Performance Test Report - api_test_1744723106</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+                color: #333;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            header {
+                background-color: #2c3e50;
+                color: white;
+                padding: 20px;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+            h1, h2, h3 {
+                margin-top: 0;
+            }
+            .test-info {
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+            .test-summary {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .summary-item {
+                flex: 1;
+                min-width: 200px;
+                background-color: #e9ecef;
+                padding: 15px;
+                border-radius: 5px;
+            }
+            .endpoint-stats {
+                margin-bottom: 30px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            th, td {
+                padding: 12px 15px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+            th {
+                background-color: #2c3e50;
+                color: white;
+            }
+            tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+            .chart-container {
+                margin: 20px 0;
+                text-align: center;
+            }
+            .chart-container img {
+                max-width: 100%;
+                height: auto;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+            footer {
+                margin-top: 30px;
+                text-align: center;
+                font-size: 0.9em;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>API Performance Test Report</h1>
+                <h2>api_test_1744723106</h2>
+            </header>
+            
+            <section class="test-info">
+                <h3>Test Information</h3>
+                <div class="test-summary">
+                    <div class="summary-item">
+                        <p><strong>Start Time:</strong> 2025-04-15T13:18:26.515004</p>
+                        <p><strong>End Time:</strong> 2025-04-15T13:18:26.682349</p>
+                        <p><strong>Total Duration:</strong> 0.17 seconds</p>
+                    </div>
+                    <div class="summary-item">
+                        <p><strong>Iterations:</strong> 5</p>
+                        <p><strong>Concurrent Execution:</strong> Yes</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="endpoint-stats">
+                <h3>Endpoint Statistics</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Success Rate</th>
+                            <th>Min Time (ms)</th>
+                            <th>Mean Time (ms)</th>
+                            <th>Median Time (ms)</th>
+                            <th>Max Time (ms)</th>
+                            <th>P95 Time (ms)</th>
+                            <th>Requests</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    
+                        <tr>
+                            <td>api/prompts/</td>
+                            <td>100.00%</td>
+                            <td>7.25</td>
+                            <td>19.72</td>
+                            <td>21.29</td>
+                            <td>30.13</td>
+                            <td>N/A</td>
+                            <td>10</td>
+                        </tr>
+        
+                        <tr>
+                            <td>api/prompts/229467/</td>
+                            <td>100.00%</td>
+                            <td>8.30</td>
+                            <td>12.98</td>
+                            <td>12.14</td>
+                            <td>18.61</td>
+                            <td>N/A</td>
+                            <td>5</td>
+                        </tr>
+        
+                        <tr>
+                            <td>api/prompts/229467/toggle_favorite/</td>
+                            <td>100.00%</td>
+                            <td>9.54</td>
+                            <td>15.18</td>
+                            <td>12.01</td>
+                            <td>23.67</td>
+                            <td>N/A</td>
+                            <td>5</td>
+                        </tr>
+        
+                        <tr>
+                            <td>api/prompts/229467/variables/</td>
+                            <td>100.00%</td>
+                            <td>7.03</td>
+                            <td>10.61</td>
+                            <td>10.18</td>
+                            <td>14.74</td>
+                            <td>N/A</td>
+                            <td>5</td>
+                        </tr>
+        
+                        <tr>
+                            <td>api/prompts/229467/render/</td>
+                            <td>100.00%</td>
+                            <td>8.87</td>
+                            <td>11.00</td>
+                            <td>10.74</td>
+                            <td>14.99</td>
+                            <td>N/A</td>
+                            <td>5</td>
+                        </tr>
+        
+                    </tbody>
+                </table>
+            </section>
+            
+            <section class="visualizations">
+                <h3>Visualizations</h3>
+    
+                <div class="chart-container">
+                    <h4>api test 1744723106 response times</h4>
+                    <img src="api_test_1744723106_response_times.png" alt="api test 1744723106 response times">
+                </div>
+        
+                <div class="chart-container">
+                    <h4>api test 1744723106 all time series</h4>
+                    <img src="api_test_1744723106_all_time_series.png" alt="api test 1744723106 all time series">
+                </div>
+        
+                <div class="chart-container">
+                    <h4>api test 1744723106 status codes</h4>
+                    <img src="api_test_1744723106_status_codes.png" alt="api test 1744723106 status codes">
+                </div>
+        
+                <div class="chart-container">
+                    <h4>api test 1744723106 size vs time</h4>
+                    <img src="api_test_1744723106_size_vs_time.png" alt="api test 1744723106 size vs time">
+                </div>
+        
+                <div class="chart-container">
+                    <h4>api test 1744723106 success rate</h4>
+                    <img src="api_test_1744723106_success_rate.png" alt="api test 1744723106 success rate">
+                </div>
+        
+                <div class="chart-container">
+                    <h4>api test 1744723106 summary stats</h4>
+                    <img src="api_test_1744723106_summary_stats.png" alt="api test 1744723106 summary stats">
+                </div>
+        
+            </section>
+            
+            <footer>
+                <p>Generated on 2025-04-15 13:18:29</p>
+            </footer>
+        </div>
+    </body>
+    </html>
+    

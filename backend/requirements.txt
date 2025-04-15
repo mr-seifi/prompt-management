@@ -10,3 +10,10 @@ gunicorn==21.2.0
 PyJWT==2.8.0
 setuptools==78.1.0
 whitenoise==6.6.0
+
+# API Performance Testing Dependencies
+requests==2.31.0
+pandas==2.1.4
+matplotlib==3.8.2
+seaborn==0.13.1
+numpy==1.26.2
