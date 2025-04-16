@@ -463,13 +463,7 @@ const promptService = {
     try {
       console.log(`POST request to render prompt ${id}:`, data);
       
-      // Rename key to match the API's expected format if needed
-      const requestData = {
-        // Backend might expect variables_values instead of variable_values
-        variables_values: data.variable_values
-      };
-      
-      const response = await axiosInstance.post<PromptRenderResponse>(`${PROMPTS_URL}${id}/render/`, requestData);
+      const response = await axiosInstance.post<PromptRenderResponse>(`${PROMPTS_URL}${id}/render/`, data);
       console.log(`Prompt ${id} rendered successfully:`, response.data);
       return response.data;
     } catch (error: any) {

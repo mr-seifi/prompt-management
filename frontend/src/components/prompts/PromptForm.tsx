@@ -423,10 +423,37 @@ const PromptForm: React.FC<PromptFormProps> = ({
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    if (name === 'content') {
+      // Extract current variables from the new content
+      const regex = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
+      const currentVariables = new Set<string>();
+      let match;
+      
+      while ((match = regex.exec(value)) !== null) {
+        currentVariables.add(match[1]);
+      }
+
+      setFormData((prev) => {
+        // Clean up variablesSchema to only keep current variables
+        const updatedSchema = { ...(prev.variablesSchema || {}) };
+        Object.keys(updatedSchema).forEach(variable => {
+          if (!currentVariables.has(variable)) {
+            delete updatedSchema[variable];
+          }
+        });
+
+        return {
+          ...prev,
+          [name]: value,
+          variablesSchema: updatedSchema
+        };
+      });
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
   };
 
   const handleFocusTextarea = () => {
