@@ -9,10 +9,11 @@ class PromptSerializer(serializers.ModelSerializer):
     """
     created_by = serializers.ReadOnlyField(source='created_by.username')
     detected_variables = serializers.SerializerMethodField()
+    variablesSchema = serializers.JSONField(source='variables_schema', required=False)
     
     class Meta:
         model = Prompt
-        fields = ['id', 'title', 'description', 'variables_schema', 'detected_variables', 
+        fields = ['id', 'title', 'description', 'variables_schema', 'variablesSchema', 'detected_variables', 
                  'favorite', 'created_by', 'created_at', 'updated_at']
         read_only_fields = ['created_by', 'created_at', 'updated_at', 'detected_variables']
     
@@ -43,8 +44,11 @@ class PromptSerializer(serializers.ModelSerializer):
                     f"Variables used in template but not defined in schema: {', '.join(undefined_vars)}"
                 )
             
-            # Auto-populate variables_schema if it's empty but variables are detected
-            if detected_vars and not variables_schema:
+            # If variables_schema is provided, use it as is
+            if variables_schema:
+                data['variables_schema'] = variables_schema
+            # Only auto-populate if no schema is provided
+            elif detected_vars:
                 auto_schema = {var: {"type": "string", "description": f"Value for {var}"} 
                               for var in detected_vars}
                 data['variables_schema'] = auto_schema
@@ -57,10 +61,11 @@ class PromptCreateSerializer(serializers.ModelSerializer):
     Serializer for creating prompts, with only the needed fields.
     """
     detected_variables = serializers.SerializerMethodField(read_only=True)
+    variablesSchema = serializers.JSONField(source='variables_schema', required=False)
     
     class Meta:
         model = Prompt
-        fields = ['id', 'title', 'description', 'variables_schema', 'detected_variables', 'favorite']
+        fields = ['id', 'title', 'description', 'variables_schema', 'variablesSchema', 'detected_variables', 'favorite']
         read_only_fields = ['id']
         
     def get_detected_variables(self, obj):
@@ -90,8 +95,11 @@ class PromptCreateSerializer(serializers.ModelSerializer):
                     f"Variables used in template but not defined in schema: {', '.join(undefined_vars)}"
                 )
             
-            # Auto-populate variables_schema if it's empty but variables are detected
-            if detected_vars and not variables_schema:
+            # If variables_schema is provided, use it as is
+            if variables_schema:
+                data['variables_schema'] = variables_schema
+            # Only auto-populate if no schema is provided
+            elif detected_vars:
                 auto_schema = {var: {"type": "string", "description": f"Value for {var}"} 
                               for var in detected_vars}
                 data['variables_schema'] = auto_schema

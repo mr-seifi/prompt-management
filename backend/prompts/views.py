@@ -123,7 +123,10 @@ class PromptViewSet(viewsets.ModelViewSet):
             'prompt_id': prompt.id,
             'title': prompt.title,
             'variables': {
-                var: schema.get(var, {"type": "string", "description": f"Value for {var}"})
+                var: {
+                    "type": schema.get(var, {}).get("type", "string"),
+                    "description": schema.get(var, {}).get("description", "")
+                }
                 for var in variables
             }
         }

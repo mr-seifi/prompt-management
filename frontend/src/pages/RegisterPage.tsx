@@ -4,41 +4,77 @@ import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
 const PageContainer = styled.div`
-  max-width: 600px;
-  margin: 60px auto;
+  max-width: 500px;
+  margin: 80px auto;
   padding: ${props => props.theme.spacing.lg};
   background-color: ${props => props.theme.colors.card};
   border-radius: calc(${props => props.theme.borderRadius.large} / 2);
   box-shadow: ${props => props.theme.shadows.large};
   
   @media (max-width: 768px) {
-    max-width: 90%;
-    margin: 30px auto;
+    max-width: 500px;
+    margin: 80px auto;
+    padding: ${props => props.theme.spacing.lg};
+  }
+
+  @media (max-width: 550px) {
+    max-width: 95%;
+    margin: 40px auto;
     padding: ${props => props.theme.spacing.md};
+  }
+
+  @media (max-width: 480px) {
+    margin: 20px auto;
+    padding: ${props => props.theme.spacing.sm};
   }
 `;
 
 const PageTitle = styled.h1`
-  font-size: 2.5rem;
+  font-size: 4rem;
   text-align: center;
   margin-bottom: 2rem;
   color: ${props => props.theme.colors.primary};
   font-weight: ${props => props.theme.typography.fontWeights.bold};
+
+  @media (max-width: 768px) {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 550px) {
+    font-size: 3.5rem;
+    margin-bottom: 1.8rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.md};
+
+  @media (max-width: 550px) {
+    gap: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const FormRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: ${props => props.theme.spacing.md};
+  width: 100%;
   
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 768px) {
+    flex-direction: row;
+    gap: ${props => props.theme.spacing.md};
+  }
+
+  @media (max-width: 550px) {
+    flex-direction: column;
+    gap: ${props => props.theme.spacing.sm};
   }
 `;
 
@@ -48,7 +84,7 @@ const FormGroup = styled.div`
   gap: ${props => props.theme.spacing.xs};
   width: 100%;
   
-  @media (max-width: 768px) {
+  @media (max-width: 550px) {
     align-items: flex-start;
     gap: 4px;
   }
@@ -57,6 +93,11 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-weight: ${props => props.theme.typography.fontWeights.medium};
   color: ${props => props.theme.colors.textPrimary};
+  font-size: 1rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const Input = styled.input`
@@ -74,34 +115,151 @@ const Input = styled.input`
     box-shadow: 0 0 0 2px ${props => props.theme.colors.primary}30;
   }
   
-  /* Add padding to the right side of password inputs to make room for the icon */
-  &[type="password"],
-  &[type="text"] {
-    padding-right: 40px;
-  }
-  
   &::placeholder {
     color: ${props => props.theme.colors.textSecondary};
     opacity: 0.8;
   }
   
   @media (max-width: 768px) {
-    width: 100%;
+    padding: ${props => props.theme.spacing.md};
+    font-size: 1rem;
+  }
+
+  @media (max-width: 550px) {
     padding: ${props => props.theme.spacing.sm};
     font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.xs};
+    font-size: 0.9rem;
+  }
+`;
+
+const PasswordInputContainer = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const PasswordToggle = styled.button`
+  position: absolute;
+  right: ${props => props.theme.spacing.sm};
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: ${props => props.theme.colors.textSecondary};
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    color: ${props => props.theme.colors.primary};
   }
 `;
 
 const PasswordRequirements = styled.ul`
-  font-size: 0.8rem;
+  list-style: none;
+  padding: 0;
+  margin: ${props => props.theme.spacing.xs} 0;
+  font-size: 0.85rem;
   color: ${props => props.theme.colors.textSecondary};
-  margin-top: ${props => props.theme.spacing.xs};
-  padding-left: 1.2rem;
   
-  @media (max-width: 768px) {
-    width: 100%;
-    margin-left: 0;
-    margin-right: 0;
+  li {
+    display: flex;
+    align-items: center;
+    gap: ${props => props.theme.spacing.xs};
+    margin-bottom: ${props => props.theme.spacing.xs};
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
+`;
+
+const PasswordSuggestionBox = styled.div`
+  background-color: ${props => props.theme.colors.card};
+  border-radius: calc(${props => props.theme.borderRadius.medium} / 2);
+  padding: ${props => props.theme.spacing.md};
+  margin: ${props => props.theme.spacing.sm} 0;
+  box-shadow: ${props => props.theme.shadows.medium};
+  
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.sm};
+  }
+`;
+
+const SuggestionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${props => props.theme.spacing.sm};
+`;
+
+const HeaderText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.sm};
+  color: ${props => props.theme.colors.primary};
+  font-weight: ${props => props.theme.typography.fontWeights.medium};
+`;
+
+const KeyIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const SuggestedPassword = styled.div`
+  font-family: monospace;
+  padding: ${props => props.theme.spacing.sm};
+  background-color: ${props => props.theme.colors.background};
+  border-radius: calc(${props => props.theme.borderRadius.small} / 2);
+  color: ${props => props.theme.colors.primary};
+  font-size: 1.1rem;
+  margin-bottom: 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: center;
+  word-break: break-all;
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.cardHighlight};
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    padding: ${props => props.theme.spacing.xs};
+  }
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: ${props => props.theme.colors.textSecondary};
+  font-size: 1.2rem;
+  padding: 0;
+  
+  &:hover {
+    color: ${props => props.theme.colors.danger};
+  }
+`;
+
+const UseButton = styled.button`
+  background-color: ${props => props.theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.small};
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.accent};
   }
 `;
 
@@ -131,9 +289,15 @@ const SubmitButton = styled.button`
   }
   
   @media (max-width: 768px) {
-    width: 100%;
+    width: auto;
     margin: ${props => props.theme.spacing.md} auto 0;
     display: block;
+  }
+
+  @media (max-width: 550px) {
+    width: 100%;
+    padding: ${props => props.theme.spacing.sm};
+    font-size: 0.95rem;
   }
 `;
 
@@ -145,10 +309,27 @@ const ErrorMessage = styled.div`
   margin-bottom: ${props => props.theme.spacing.md};
   font-size: 0.9rem;
   
-  @media (max-width: 768px) {
+  @media (max-width: 550px) {
     width: 100%;
     margin-left: 0;
     margin-right: 0;
+    font-size: 0.85rem;
+  }
+`;
+
+const SuccessMessage = styled.div`
+  color: ${props => props.theme.colors.success};
+  background-color: ${props => props.theme.colors.success}15;
+  padding: ${props => props.theme.spacing.sm};
+  border-radius: calc(${props => props.theme.borderRadius.small} / 2);
+  margin-bottom: ${props => props.theme.spacing.md};
+  font-size: 0.9rem;
+  
+  @media (max-width: 550px) {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 0.85rem;
   }
 `;
 
@@ -156,6 +337,7 @@ const BottomText = styled.p`
   text-align: center;
   margin-top: ${props => props.theme.spacing.lg};
   color: ${props => props.theme.colors.textSecondary};
+  font-size: 0.95rem;
   
   a {
     color: ${props => props.theme.colors.accent};
@@ -166,124 +348,10 @@ const BottomText = styled.p`
       text-decoration: underline;
     }
   }
-`;
 
-const PasswordInputContainer = styled.div`
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-`;
-
-const TogglePasswordButton = styled.button`
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #211951;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  z-index: 2;
-  pointer-events: auto;
-  width: 20px;
-  height: 20px;
-  
-  &:hover {
-    color: ${props => props.theme.colors.primary};
-  }
-  
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-`;
-
-const PasswordSuggestionBox = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: ${props => props.theme.colors.card};
-  border: 1px solid ${props => props.theme.colors.primary};
-  border-radius: calc(${props => props.theme.borderRadius.medium} / 2);
-  padding: ${props => props.theme.spacing.md};
-  margin-top: 5px;
-  box-shadow: ${props => props.theme.shadows.medium};
-  z-index: 10;
-`;
-
-const SuggestionHeader = styled.div`
-  font-weight: ${props => props.theme.typography.fontWeights.medium};
-  color: ${props => props.theme.colors.textPrimary};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const HeaderText = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const KeyIcon = styled.span`
-  color: #211951;
-  display: inline-flex;
-  align-items: center;
-`;
-
-const SuggestedPassword = styled.div`
-  font-family: monospace;
-  padding: ${props => props.theme.spacing.sm};
-  background-color: ${props => props.theme.colors.background};
-  border-radius: calc(${props => props.theme.borderRadius.small} / 2);
-  color: ${props => props.theme.colors.primary};
-  font-size: 1.1rem;
-  margin-bottom: 0;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-align: center;
-  
-  &:hover {
-    background-color: ${props => props.theme.colors.cardHighlight};
-  }
-`;
-
-const CloseButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: ${props => props.theme.colors.textSecondary};
-  font-size: 1.2rem;
-  padding: 0;
-  
-  &:hover {
-    color: ${props => props.theme.colors.danger};
-  }
-`;
-
-const UseButton = styled.button`
-  background-color: ${props => props.theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.small};
-  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: ${props => props.theme.colors.accent};
+  @media (max-width: 550px) {
+    font-size: 0.9rem;
+    margin-top: ${props => props.theme.spacing.md};
   }
 `;
 
@@ -465,7 +533,7 @@ const RegisterPage: React.FC = () => {
   
   return (
     <PageContainer>
-      <PageTitle>Create an Account</PageTitle>
+      <PageTitle>Sign up</PageTitle>
       
       {errors.general && <ErrorMessage>{errors.general}</ErrorMessage>}
       
@@ -537,7 +605,7 @@ const RegisterPage: React.FC = () => {
                 placeholder="Password"
                 required
               />
-              <TogglePasswordButton 
+              <PasswordToggle 
                 type="button" 
                 onClick={togglePasswordVisibility}
                 tabIndex={-1}
@@ -552,7 +620,7 @@ const RegisterPage: React.FC = () => {
                     <path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 23 12C21.27 7.61 17 4.5 12 4.5C10.6 4.5 9.26 4.75 8 5.2L10.17 7.37C10.74 7.13 11.35 7 12 7ZM2 4.27L4.28 6.55L4.74 7.01C3.08 8.3 1.78 10.02 1 12C2.73 16.39 7 19.5 12 19.5C13.55 19.5 15.03 19.2 16.38 18.66L16.8 19.08L19.73 22L21 20.73L3.27 3L2 4.27ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.78 9 12C9 13.66 10.34 15 12 15C12.22 15 12.44 14.97 12.65 14.92L14.2 16.47C13.53 16.8 12.79 17 12 17C9.24 17 7 14.76 7 12C7 11.21 7.2 10.47 7.53 9.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z"/>
                   </svg>
                 )}
-              </TogglePasswordButton>
+              </PasswordToggle>
               
               {showPasswordSuggestion && (
                 <PasswordSuggestionBox>
