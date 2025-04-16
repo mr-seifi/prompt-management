@@ -12,14 +12,9 @@ const PageContainer = styled.div`
   box-shadow: ${props => props.theme.shadows.large};
   
   @media (max-width: 768px) {
-    max-width: 95%;
+    max-width: 90%;
     margin: 40px auto;
     padding: ${props => props.theme.spacing.md};
-  }
-
-  @media (max-width: 480px) {
-    margin: 20px auto;
-    padding: ${props => props.theme.spacing.sm};
   }
 `;
 
@@ -29,26 +24,12 @@ const PageTitle = styled.h1`
   margin-bottom: 2rem;
   color: ${props => props.theme.colors.primary};
   font-weight: ${props => props.theme.typography.fontWeights.bold};
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 1.75rem;
-    margin-bottom: 1rem;
-  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.md};
-
-  @media (max-width: 480px) {
-    gap: ${props => props.theme.spacing.sm};
-  }
 `;
 
 const FormGroup = styled.div`
@@ -66,11 +47,6 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-weight: ${props => props.theme.typography.fontWeights.medium};
   color: ${props => props.theme.colors.textPrimary};
-  font-size: 1rem;
-
-  @media (max-width: 480px) {
-    font-size: 0.9rem;
-  }
 `;
 
 const Input = styled.input`
@@ -94,13 +70,9 @@ const Input = styled.input`
   }
   
   @media (max-width: 768px) {
+    width: 100%;
     padding: ${props => props.theme.spacing.sm};
     font-size: 0.95rem;
-  }
-
-  @media (max-width: 480px) {
-    padding: ${props => props.theme.spacing.xs};
-    font-size: 0.9rem;
   }
 `;
 
@@ -134,11 +106,6 @@ const SubmitButton = styled.button`
     margin: ${props => props.theme.spacing.md} auto 0;
     display: block;
   }
-
-  @media (max-width: 480px) {
-    padding: ${props => props.theme.spacing.sm};
-    font-size: 0.95rem;
-  }
 `;
 
 const ErrorMessage = styled.div`
@@ -153,7 +120,6 @@ const ErrorMessage = styled.div`
     width: 100%;
     margin-left: 0;
     margin-right: 0;
-    font-size: 0.85rem;
   }
 `;
 
@@ -169,7 +135,6 @@ const SuccessMessage = styled.div`
     width: 100%;
     margin-left: 0;
     margin-right: 0;
-    font-size: 0.85rem;
   }
 `;
 
@@ -177,7 +142,6 @@ const BottomText = styled.p`
   text-align: center;
   margin-top: ${props => props.theme.spacing.lg};
   color: ${props => props.theme.colors.textSecondary};
-  font-size: 0.95rem;
   
   a {
     color: ${props => props.theme.colors.accent};
@@ -187,11 +151,6 @@ const BottomText = styled.p`
     &:hover {
       text-decoration: underline;
     }
-  }
-
-  @media (max-width: 480px) {
-    font-size: 0.9rem;
-    margin-top: ${props => props.theme.spacing.md};
   }
 `;
 

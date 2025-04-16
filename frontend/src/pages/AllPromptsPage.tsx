@@ -67,30 +67,17 @@ const AllPromptsPage: React.FC = () => {
     }
   };
 
-  // Handler for page changes
   const handlePageChange = (page: number) => {
-    // When search is active, we handle pagination on the client side
-    // and don't send the page parameter to backend
     applyFilters({ page });
   };
 
   // Handler for filter changes that should reset pagination
   const handleFilterChange = (newFilters: any) => {
-    // If it's a search filter, we'll handle the pagination on client side
-    // but we still want to update the UI to show page 1
-    if ('search' in newFilters) {
-      applyFilters({
-        ...newFilters,
-        page: 1 // Reset to page 1 for search, though this won't be sent to backend
-      });
-    }
-    // If changing any other filter (besides page), reset to page 1
-    else if (!('page' in newFilters)) {
-      applyFilters({ ...newFilters, page: 1 });
-    } 
-    // For direct page changes, just apply as is
-    else {
+    // If changing any filter other than page, reset to page 1
+    if ('page' in newFilters) {
       applyFilters(newFilters);
+    } else {
+      applyFilters({ ...newFilters, page: 1 });
     }
   };
 
@@ -101,7 +88,7 @@ const AllPromptsPage: React.FC = () => {
     <PageContainer>
       <HeaderContainer>
         <PageTitle>All Prompts</PageTitle>
-        <Button as={Link} variant="primary" to="/prompts/new">
+        <Button as={Link} to="/prompts/new">
           Create New Prompt
         </Button>
       </HeaderContainer>

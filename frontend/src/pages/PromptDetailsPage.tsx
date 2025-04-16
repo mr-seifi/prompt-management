@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Card from '../components/ui/Card';
@@ -8,11 +8,13 @@ import promptService from '../services/promptService';
 import usePrompts from '../hooks/usePrompts';
 import { formatDateTimeForDisplay } from '../services/promptService';
 import PromptRenderer from '../components/prompts/PromptRenderer';
+import ReactDOM from 'react-dom';
 
 const PageContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: ${props => props.theme.spacing.lg};
+  overflow: visible;
 `;
 
 const PageHeader = styled.div`
@@ -35,12 +37,15 @@ const ButtonGroup = styled.div`
 
 const PromptDetail = styled.div`
   margin-bottom: 1.5rem;
+  overflow: visible;
 `;
 
 const ContentContainer = styled.div`
   white-space: pre-wrap;
   line-height: 1.6;
   color: ${props => props.theme.colors.textSecondary};
+  position: relative;
+  overflow: visible;
 `;
 
 const HighlightedVariable = styled.span`
@@ -54,31 +59,24 @@ const HighlightedVariable = styled.span`
   align-items: center;
   border-bottom: 1px dashed ${props => props.theme.colors.accent};
   transition: background-color 0.2s ease;
+  z-index: 10;
 
   &:hover {
     background-color: ${props => props.theme.colors.accent}30;
   }
 `;
 
-const Tooltip = styled.div`
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: ${props => props.theme.colors.cardHelpHighlight};
-  color: ${props => props.theme.colors.textPrimary};
+const TooltipContainer = styled.div`
+  position: fixed;
+  z-index: 9999;
   padding: 0.75rem;
+  background-color: ${props => props.theme.colors.cardHelpHighlight};
   border-radius: ${props => props.theme.borderRadius.small};
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  min-width: 180px;
   max-width: 280px;
-  z-index: 100;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
-  font-size: 0.9rem;
-  text-align: center;
+  min-width: 180px;
   pointer-events: none;
+  text-align: center;
 
   &:after {
     content: '';
@@ -89,11 +87,6 @@ const Tooltip = styled.div`
     border-width: 5px;
     border-style: solid;
     border-color: ${props => props.theme.colors.cardHighlight} transparent transparent transparent;
-  }
-
-  ${HighlightedVariable}:hover & {
-    opacity: 1;
-    visibility: visible;
   }
 `;
 
@@ -136,13 +129,12 @@ const PromptMeta = styled.div`
 const FavoriteStatus = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   cursor: pointer;
 `;
 
 const FavoriteIcon = styled.span<{ isFavorite: boolean }>`
   color: ${({ isFavorite, theme }) => (isFavorite ? theme.colors.warning : '#ccc')};
-  font-size: 1.25rem;
+  font-size: 1.5rem;
 `;
 
 const LoadingMessage = styled.div`
@@ -164,13 +156,17 @@ const ErrorMessage = styled.div`
 const StyledCard = styled(Card)`
   padding: ${props => props.theme.spacing.lg};
   margin-bottom: 1.5rem;
+  overflow: visible;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 1.5rem;
-  margin-top: 0;
+const SectionTitle = styled.h3`
+  font-size: 1.1rem;
   margin-bottom: 1rem;
+  font-weight: 600;
   color: ${props => props.theme.colors.textPrimary};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const TabContainer = styled.div`
@@ -199,12 +195,66 @@ const TabButton = styled.button<{ active: boolean }>`
   }
 `;
 
+const DeleteButton = styled(Button)`
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: ${props => props.theme.colors.danger};
+  color: white;
+  border-radius: ${props => props.theme.borderRadius.medium};
+  
+  &:hover {
+    background-color: #FF3333;
+  }
+`;
+
+const EditButton = styled(Button)`
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #211951;
+  color: white;
+  border-radius: ${props => props.theme.borderRadius.medium};
+  
+  &:hover {
+    background-color: #342c68;
+  }
+`;
+
 interface HighlightedContentProps {
   content: string;
   variablesSchema?: Record<string, any>;
 }
 
 const HighlightedContent: React.FC<HighlightedContentProps> = ({ content, variablesSchema = {} }) => {
+  const [tooltip, setTooltip] = useState<{
+    visible: boolean;
+    name: string;
+    position: { x: number; y: number };
+  } | null>(null);
+
+  const showTooltip = useCallback((e: React.MouseEvent, variableName: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const topY = rect.top - 10;
+    
+    setTooltip({
+      visible: true,
+      name: variableName,
+      position: { x: centerX, y: topY }
+    });
+  }, []);
+
+  const hideTooltip = useCallback(() => {
+    setTooltip(null);
+  }, []);
+
   if (!content) return null;
 
   const regex = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
@@ -229,14 +279,12 @@ const HighlightedContent: React.FC<HighlightedContentProps> = ({ content, variab
     }
     
     parts.push(
-      <HighlightedVariable key={`var-${match.index}`}>
+      <HighlightedVariable 
+        key={`var-${match.index}`}
+        onMouseEnter={(e) => showTooltip(e, variableName)}
+        onMouseLeave={hideTooltip}
+      >
         {`{{${variableName}}}`}
-        <Tooltip>
-          <TooltipTitle>{variableName}</TooltipTitle>
-          <TooltipContent>
-            {variablesSchema[variableName]?.description || `Value for ${variableName}`}
-          </TooltipContent>
-        </Tooltip>
       </HighlightedVariable>
     );
     
@@ -247,7 +295,26 @@ const HighlightedContent: React.FC<HighlightedContentProps> = ({ content, variab
     parts.push(content.substring(lastIndex));
   }
   
-  return <ContentContainer>{parts}</ContentContainer>;
+  return (
+    <>
+      <ContentContainer>{parts}</ContentContainer>
+      {tooltip && tooltip.visible && ReactDOM.createPortal(
+        <TooltipContainer 
+          style={{
+            left: `${tooltip.position.x}px`,
+            top: `${tooltip.position.y}px`,
+            transform: 'translate(-50%, -100%)'
+          }}
+        >
+          <TooltipTitle>{tooltip.name}</TooltipTitle>
+          <TooltipContent>
+            {variablesSchema[tooltip.name]?.description || `Value for ${tooltip.name}`}
+          </TooltipContent>
+        </TooltipContainer>,
+        document.body
+      )}
+    </>
+  );
 };
 
 const PromptDetailsPage: React.FC = () => {
@@ -324,12 +391,17 @@ const PromptDetailsPage: React.FC = () => {
       <PageHeader>
         <PageTitle>{prompt.title}</PageTitle>
         <ButtonGroup>
-          <Button variant="danger" onClick={handleDelete}>
-            Delete
-          </Button>
-          <Button variant="primary" as={Link} to={`/prompts/${prompt.id}/edit`}>
-            Edit
-          </Button>
+          <DeleteButton onClick={handleDelete} aria-label="Delete prompt">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+              <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+            </svg>
+          </DeleteButton>
+          <EditButton as={Link} to={`/prompts/${prompt.id}/edit`} aria-label="Edit prompt">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+            </svg>
+          </EditButton>
         </ButtonGroup>
       </PageHeader>
       
@@ -357,7 +429,12 @@ const PromptDetailsPage: React.FC = () => {
         <>
           <StyledCard>
             <PromptDetail>
-              <SectionTitle>Description</SectionTitle>
+              <SectionTitle>
+                Description
+                <FavoriteStatus onClick={handleToggleFavorite}>
+                  <FavoriteIcon isFavorite={prompt.isFavorite}>★</FavoriteIcon>
+                </FavoriteStatus>
+              </SectionTitle>
               <HighlightedContent 
                 content={prompt.content} 
                 variablesSchema={prompt.variablesSchema} 
@@ -375,10 +452,6 @@ const PromptDetailsPage: React.FC = () => {
                 <div>
                   Last updated: {prompt.updatedAt}
                 </div>
-                <FavoriteStatus onClick={handleToggleFavorite}>
-                  <FavoriteIcon isFavorite={prompt.isFavorite}>★</FavoriteIcon>
-                  {prompt.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                </FavoriteStatus>
               </PromptMeta>
             </PromptDetail>
           </StyledCard>
@@ -390,4 +463,4 @@ const PromptDetailsPage: React.FC = () => {
   ) : null;
 };
 
-export default PromptDetailsPage; 
+export default PromptDetailsPage;
