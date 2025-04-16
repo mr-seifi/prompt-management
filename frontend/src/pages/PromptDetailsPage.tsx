@@ -450,7 +450,7 @@ const PromptDetailsPage: React.FC = () => {
               
               <PromptMeta>
                 <div>
-                  Last updated: {prompt.updatedAt}
+                  Last updated: {formatDateTimeForDisplay(prompt.updatedAt)}
                 </div>
               </PromptMeta>
             </PromptDetail>

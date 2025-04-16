@@ -94,7 +94,7 @@ const PromptCard: React.FC<PromptCardProps> = ({
   onDelete,
   onToggleFavorite,
 }) => {
-  const formattedDate = prompt.updatedAt;
+  const formattedDate = formatDateTimeForDisplay(prompt.updatedAt);
   
   // Safely extract variables from detectedVariables
   let variables: string[] = [];
