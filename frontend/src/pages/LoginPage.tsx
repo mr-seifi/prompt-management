@@ -16,6 +16,12 @@ const PageContainer = styled.div`
     margin: 40px auto;
     padding: ${props => props.theme.spacing.md};
   }
+
+  @media (max-width: 480px) {
+    max-width: 95%;
+    margin: 20px auto;
+    padding: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -24,12 +30,26 @@ const PageTitle = styled.h1`
   margin-bottom: 2rem;
   color: ${props => props.theme.colors.primary};
   font-weight: ${props => props.theme.typography.fontWeights.bold};
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.md};
+
+  @media (max-width: 480px) {
+    gap: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const FormGroup = styled.div`
@@ -47,6 +67,10 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-weight: ${props => props.theme.typography.fontWeights.medium};
   color: ${props => props.theme.colors.textPrimary};
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const Input = styled.input`
@@ -70,9 +94,13 @@ const Input = styled.input`
   }
   
   @media (max-width: 768px) {
-    width: 100%;
     padding: ${props => props.theme.spacing.sm};
     font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.xs};
+    font-size: 0.9rem;
   }
 `;
 
@@ -106,6 +134,11 @@ const SubmitButton = styled.button`
     margin: ${props => props.theme.spacing.md} auto 0;
     display: block;
   }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.sm};
+    font-size: 0.95rem;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -120,6 +153,11 @@ const ErrorMessage = styled.div`
     width: 100%;
     margin-left: 0;
     margin-right: 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: ${props => props.theme.spacing.xs};
   }
 `;
 
@@ -136,6 +174,11 @@ const SuccessMessage = styled.div`
     margin-left: 0;
     margin-right: 0;
   }
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: ${props => props.theme.spacing.xs};
+  }
 `;
 
 const BottomText = styled.p`
@@ -151,6 +194,16 @@ const BottomText = styled.p`
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  @media (max-width: 768px) {
+    margin-top: ${props => props.theme.spacing.md};
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: ${props => props.theme.spacing.sm};
+    font-size: 0.9rem;
   }
 `;
 

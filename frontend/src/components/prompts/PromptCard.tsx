@@ -28,6 +28,7 @@ const PromptTitle = styled.div`
 const TitleLink = styled(Link)`
   text-decoration: none;
   color: inherit;
+  cursor: pointer;
   
   &:hover {
     text-decoration: underline;
@@ -54,6 +55,7 @@ const PromptContent = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
 `;
 
 const VariablesContainer = styled.div`
@@ -75,6 +77,7 @@ const DateInfo = styled.small`
   color: ${props => props.theme.colors.textSecondary};
   font-size: ${props => props.theme.typography.fontSizes.small};
   opacity: 0.8;
+  cursor: pointer;
 `;
 
 const StyledCard = styled(Card)`

@@ -47,6 +47,7 @@ const getButtonColor = (variant: ButtonVariant, theme: any, outlined: boolean) =
     
     &:hover:not(:disabled) {
       background-color: ${color}DD;
+      color: ${textColor} !important;
     }
   `;
 };
@@ -61,7 +62,7 @@ const getButtonSize = (size: string, theme: any) => {
       `;
     case 'medium':
       return css`
-        padding: ${theme.spacing.sm} ${theme.spacing.lg};
+        padding: 0.5rem 1.5rem;
         font-size: ${theme.typography.fontSizes.medium};
         border-radius: ${theme.borderRadius.medium};
       `;
@@ -73,7 +74,7 @@ const getButtonSize = (size: string, theme: any) => {
       `;
     default:
       return css`
-        padding: ${theme.spacing.sm} ${theme.spacing.lg};
+        padding: 0.5rem 1.5rem;
         font-size: ${theme.typography.fontSizes.medium};
         border-radius: ${theme.borderRadius.medium};
       `;

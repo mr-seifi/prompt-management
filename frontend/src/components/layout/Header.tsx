@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +11,7 @@ const HeaderContainer = styled.header`
   background: ${props => props.theme.colors.primary};
   color: white;
   box-shadow: ${props => props.theme.shadows.medium};
+  position: relative;
 `;
 
 const LogoLink = styled(Link)`
@@ -43,19 +44,26 @@ const Logo = styled.h1`
 
 const LogoHighlight = styled.span`
   color: ${props => props.theme.colors.accent};
+  font-style: italic;
 `;
 
-const Nav = styled.nav`
+const Nav = styled.nav<{ isOpen: boolean }>`
   display: flex;
   gap: ${props => props.theme.spacing.lg};
   align-items: center;
 
-  @media (max-width: 768px) {
-    gap: ${props => props.theme.spacing.md};
-  }
-
-  @media (max-width: 480px) {
-    gap: ${props => props.theme.spacing.sm};
+  @media (max-width: 690px) {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: ${props => props.theme.colors.primary};
+    flex-direction: column;
+    padding: 1rem;
+    width: 200px;
+    box-shadow: ${props => props.theme.shadows.large};
+    border-radius: 0 0 ${props => props.theme.borderRadius.medium} ${props => props.theme.borderRadius.medium};
+    display: ${props => props.isOpen ? 'flex' : 'none'};
+    z-index: 1000;
   }
 `;
 
@@ -88,13 +96,19 @@ const NavLink = styled(Link)`
       width: 100%;
     }
   }
+
+  @media (max-width: 690px) {
+    width: 100%;
+    padding: 0.5rem 0;
+    text-align: center;
+  }
 `;
 
 const LogoutButton = styled.button`
   background: transparent;
-  border: 2px solid ${props => props.theme.colors.accent};
+  border: none;
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.5rem !important;
   border-radius: ${props => props.theme.borderRadius.medium};
   font-weight: ${props => props.theme.typography.fontWeights.medium};
   cursor: pointer;
@@ -103,12 +117,23 @@ const LogoutButton = styled.button`
   &:hover {
     background-color: ${props => props.theme.colors.accent};
   }
+
+  @media (max-width: 690px) {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
 `;
 
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
   gap: ${props => props.theme.spacing.md};
+
+  @media (max-width: 690px) {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+  }
 `;
 
 const UserName = styled.span`
@@ -120,9 +145,24 @@ const UserName = styled.span`
   }
 `;
 
+const BurgerButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  
+  @media (max-width: 690px) {
+    display: block;
+  }
+`;
+
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const handleLogout = async () => {
     try {
@@ -133,13 +173,22 @@ const Header: React.FC = () => {
       navigate('/login');
     }
   };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
   
   return (
     <HeaderContainer>
       <LogoLink to="/">
         <Logo>Prompt <LogoHighlight>Manager</LogoHighlight></Logo>
       </LogoLink>
-      <Nav>
+      
+      <BurgerButton onClick={toggleMenu} aria-label="Toggle menu">
+        {isMenuOpen ? '✕' : '☰'}
+      </BurgerButton>
+      
+      <Nav isOpen={isMenuOpen}>
         <NavLink to="/">Home</NavLink>
         <NavLink to="/prompts">All Prompts</NavLink>
         <NavLink to="/prompts/new">Create New</NavLink>

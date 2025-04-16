@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
+
+
 const PageContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -65,9 +67,22 @@ const TypewriterText = styled.h1<TypewriterTextProps>`
     50% { opacity: 1 }
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 1250px) {  
+    margin-bottom: 0;
+    font-size: 4rem;
+  }
+    @media (max-width: 1025px) {
     margin-bottom: ${props => props.theme.spacing.xl};
-    font-size: 3rem;
+    font-size: 3.5rem;
+  }
+    @media (max-width: 920px) {
+    margin-bottom: 0;
+    font-size: 2.5rem;
+  }
+  }
+    @media (max-width: 816px) {
+    margin-bottom: ${props => props.theme.spacing.xl};
+    font-size: 2.5rem;
   }
 `;
 
@@ -89,9 +104,25 @@ const ImageWrapper = styled.div`
   width: 480px;
   height: 480px;
   
-  @media (max-width: 768px) {
-    width: 360px;
-    height: 360px;
+  @media (max-width: 1250px) {
+    width: 400px;
+    height: 400px;
+  }
+    @media (max-width: 1000px) {
+    width: 350px;
+    height: 350px;
+  }
+    @media (max-width: 870px) {
+    width: 300px;
+    height: 300px;
+  }
+    @media (max-width: 770px) {
+    width: 350px;
+    height: 350px;
+  }
+    @media (max-width: 440px) {
+    width: 300px;
+    height: 300px;
   }
 `;
 
@@ -464,34 +495,10 @@ const HomePage: React.FC = () => {
       <ImageSection>
         <ImageWrapper>
           <PromptImage 
-            src="https://static.vecteezy.com/system/resources/previews/001/839/027/non_2x/man-using-laptop-computer-icon-free-vector.jpg" 
+            src="https://static.vecteezy.com/system/resources/previews/035/631/599/non_2x/man-using-laptop-surfing-internet-searching-information-email-checking-hand-drawn-style-illustrations-isolated-on-white-background-vector.jpg" 
             alt="Man using laptop computer"
           />
           <ButtonsContainer>
-            <RoundButton 
-              aria-label="Add" 
-              onClick={() => openModal('add')}
-            >
-              +
-            </RoundButton>
-            <RoundButton 
-              aria-label="Search" 
-              onClick={() => openModal('search')}
-            >
-              🔍
-            </RoundButton>
-            <RoundButton 
-              aria-label="Edit" 
-              onClick={() => openModal('edit')}
-            >
-              ✏️
-            </RoundButton>
-            <RoundButton 
-              aria-label="Favorite" 
-              onClick={() => openModal('favorite')}
-            >
-              ⭐
-            </RoundButton>
           </ButtonsContainer>
         </ImageWrapper>
       </ImageSection>

@@ -15,6 +15,16 @@ const PageContainer = styled.div`
   flex-direction: column;
   gap: 1.5rem;
   padding: ${props => props.theme.spacing.lg};
+  
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md};
+    gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.sm};
+    gap: 0.75rem;
+  }
 `;
 
 const HeaderContainer = styled.div`
@@ -22,12 +32,37 @@ const HeaderContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  button {
+    &:hover {
+      color: white !important;
+      background-color: ${props => props.theme.colors.primary};
+    }
+  }
 `;
 
 const PageTitle = styled.h1`
   font-size: 2rem;
   margin: 0;
   color: ${props => props.theme.colors.textPrimary};
+  
+  @media (max-width: 1024px) {
+    font-size: 1.8rem;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.6rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.4rem;
+  }
 `;
 
 const LoadingMessage = styled.div`
@@ -35,6 +70,16 @@ const LoadingMessage = styled.div`
   padding: 2rem;
   font-size: 1.125rem;
   color: ${props => props.theme.colors.textSecondary};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -44,6 +89,16 @@ const ErrorMessage = styled.div`
   color: ${props => props.theme.colors.danger};
   background-color: ${props => props.theme.colors.cardHighlight};
   border-radius: ${props => props.theme.borderRadius.medium};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const AllPromptsPage: React.FC = () => {

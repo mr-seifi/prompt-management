@@ -16,20 +16,45 @@ const PageContainer = styled.div`
     margin: 30px auto;
     padding: ${props => props.theme.spacing.md};
   }
+
+  @media (max-width: 480px) {
+    max-width: 95%;
+    margin: 20px auto;
+    padding: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const PageTitle = styled.h1`
-  font-size: 2.5rem;
+  font-size: 3.6rem;
   text-align: center;
   margin-bottom: 2rem;
   color: ${props => props.theme.colors.primary};
   font-weight: ${props => props.theme.typography.fontWeights.bold};
+
+  @media (max-width: 1024px) {
+    font-size: 3.15rem;
+    margin-bottom: 1.8rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.35rem;
+    margin-bottom: 1.2rem;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.md};
+
+  @media (max-width: 480px) {
+    gap: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const FormRow = styled.div`
@@ -57,6 +82,10 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-weight: ${props => props.theme.typography.fontWeights.medium};
   color: ${props => props.theme.colors.textPrimary};
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const Input = styled.input`
@@ -74,7 +103,6 @@ const Input = styled.input`
     box-shadow: 0 0 0 2px ${props => props.theme.colors.primary}30;
   }
   
-  /* Add padding to the right side of password inputs to make room for the icon */
   &[type="password"],
   &[type="text"] {
     padding-right: 40px;
@@ -86,9 +114,13 @@ const Input = styled.input`
   }
   
   @media (max-width: 768px) {
-    width: 100%;
     padding: ${props => props.theme.spacing.sm};
     font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.xs};
+    font-size: 0.9rem;
   }
 `;
 
@@ -102,6 +134,10 @@ const PasswordRequirements = styled.ul`
     width: 100%;
     margin-left: 0;
     margin-right: 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
   }
 `;
 
@@ -135,6 +171,11 @@ const SubmitButton = styled.button`
     margin: ${props => props.theme.spacing.md} auto 0;
     display: block;
   }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.sm};
+    font-size: 0.95rem;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -149,6 +190,11 @@ const ErrorMessage = styled.div`
     width: 100%;
     margin-left: 0;
     margin-right: 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: ${props => props.theme.spacing.xs};
   }
 `;
 
@@ -165,6 +211,16 @@ const BottomText = styled.p`
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  @media (max-width: 768px) {
+    margin-top: ${props => props.theme.spacing.md};
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: ${props => props.theme.spacing.sm};
+    font-size: 0.9rem;
   }
 `;
 
@@ -205,6 +261,11 @@ const TogglePasswordButton = styled.button`
     width: 100%;
     height: 100%;
   }
+
+  @media (max-width: 480px) {
+    width: 18px;
+    height: 18px;
+  }
 `;
 
 const PasswordSuggestionBox = styled.div`
@@ -219,6 +280,10 @@ const PasswordSuggestionBox = styled.div`
   margin-top: 5px;
   box-shadow: ${props => props.theme.shadows.medium};
   z-index: 10;
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const SuggestionHeader = styled.div`
@@ -228,35 +293,26 @@ const SuggestionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const HeaderText = styled.span`
   display: flex;
   align-items: center;
   gap: 8px;
+
+  @media (max-width: 480px) {
+    gap: 4px;
+  }
 `;
 
 const KeyIcon = styled.span`
   color: #211951;
   display: inline-flex;
   align-items: center;
-`;
-
-const SuggestedPassword = styled.div`
-  font-family: monospace;
-  padding: ${props => props.theme.spacing.sm};
-  background-color: ${props => props.theme.colors.background};
-  border-radius: calc(${props => props.theme.borderRadius.small} / 2);
-  color: ${props => props.theme.colors.primary};
-  font-size: 1.1rem;
-  margin-bottom: 0;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-align: center;
-  
-  &:hover {
-    background-color: ${props => props.theme.colors.cardHighlight};
-  }
 `;
 
 const CloseButton = styled.button`
@@ -272,18 +328,16 @@ const CloseButton = styled.button`
   }
 `;
 
-const UseButton = styled.button`
-  background-color: ${props => props.theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.small};
-  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: ${props => props.theme.colors.accent};
+const SuggestedPassword = styled.div`
+  font-family: monospace;
+  padding: ${props => props.theme.spacing.sm};
+  background-color: ${props => props.theme.colors.background};
+  border-radius: calc(${props => props.theme.borderRadius.small} / 2);
+  color: ${props => props.theme.colors.primary};
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    padding: ${props => props.theme.spacing.xs};
   }
 `;
 
